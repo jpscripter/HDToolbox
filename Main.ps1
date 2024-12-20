@@ -1,44 +1,26 @@
+#region Setup
+add-type -AssemblyName PresentationFramework
+$ErrorActionPreference = 'Stop'
+$ScriptRoot = $PSScriptRoot
+#endregion
 
+#region Make Xaml Object
+$WindowXamlText = Get-Content -raw -Path "$ScriptRoot\App.xaml"
+$inputXML = $WindowXamlText -replace 'mc:Ignorable="d"','' -replace "x:N",'N'  -replace '^<Win.*', '<Window'
+[xml]$XAML = $inputXML
+$reader=(New-Object System.Xml.XmlNodeReader $xaml)
+$Form=[Windows.Markup.XamlReader]::Load( $reader )
+#endregion
 
-$Xaml = @"
-<Window Title="MainWindow"  Width="800">
-    <Grid>
-        <Border Background="Gray" Height="50" VerticalAlignment="Top">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Image Source="C:\Users\jpscr\Repos\HelpDeskHelper\th.jpg" Height="50" Margin="10,0" VerticalAlignment="Center"/>
-                <TextBlock Text="My Company" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-            </StackPanel>
-        </Border>
-        <StackPanel Margin="0,55,0,0">
-            <Expander HorizontalAlignment="Stretch" Header="Variables&#xD;&#xA;" VerticalAlignment="Stretch" IsExpanded="True">
-                <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}" IsReadOnly="False"/>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Header="Remediations&#xA;"  VerticalAlignment="Stretch"  IsExpanded="True">
-                <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}" IsReadOnly="True">
-                    <DataGrid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Execute"/>
-                        </ContextMenu>
-                    </DataGrid.ContextMenu>
-                </DataGrid>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Header="Tests&#xA;" VerticalAlignment="Stretch" IsExpanded="True">
-                <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}" IsReadOnly="True">
-                    <DataGrid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Execute"/>
-                        </ContextMenu>
-                    </DataGrid.ContextMenu>
-                </DataGrid>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch"  Header="Logs&#xA;" VerticalAlignment="Stretch" Height="200" IsExpanded="True">
-                <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}" IsReadOnly="True"/>
-            </Expander>
-        </StackPanel>
-        <Button Name="StartGather" Margin="100,5" Height="30" Width="70" VerticalAlignment="Bottom" HorizontalAlignment="Right">Start Gather
-        </Button>
-        <Button Name="StopGather" Margin="5,5" Height="30" Width="70" VerticalAlignment="Bottom" HorizontalAlignment="Right">Stop Gather
-        </Button>
-    </Grid>
-</Window>
-"@
+#get Fields
+$xaml.SelectNodes("//*[@Name]").ForEach(
+    {
+        "trying item $($_.Name)"
+    try 
+    {
+        Set-Variable -Name "WPF$($_.Name)" -Value $Form.FindName($_.Name) -ErrorAction Stop
+    }
+    catch{
+        throw
+    }
+    })
