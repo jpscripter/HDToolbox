@@ -1,0 +1,3 @@
+Write-Output @{
+	"SMSName"="Client"
+}

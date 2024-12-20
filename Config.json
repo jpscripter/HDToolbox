@@ -1,0 +1,23 @@
+{
+    "ScriptVersion": "1.0.0",
+    "CompanyName": "JPS",
+    "Description": "This is a sample PowerShell module",
+    "IconPath": ".\\th.jpg",
+
+    "Height" : 800,
+    "width" : 800,
+    "Tests" : true,
+    "Remediation" : true,
+    "Gather" : true,
+
+    "Logs" : [
+        "Log entry 1",
+        "Log entry 2",
+        "Log entry 3"
+],
+
+    "ProjectVersion" : "1.0.0",
+    "ProjectAuthor" : "Jeff Scripter"
+
+
+}

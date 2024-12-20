@@ -2,6 +2,7 @@
 add-type -AssemblyName PresentationFramework
 $ErrorActionPreference = 'Stop'
 $ScriptRoot = $PSScriptRoot
+
 #endregion
 
 #region Make Xaml Object
@@ -16,11 +17,6 @@ $Form=[Windows.Markup.XamlReader]::Load( $reader )
 $xaml.SelectNodes("//*[@Name]").ForEach(
     {
         "trying item $($_.Name)"
-    try 
-    {
-        Set-Variable -Name "WPF$($_.Name)" -Value $Form.FindName($_.Name) -ErrorAction Stop
-    }
-    catch{
-        throw
-    }
+        Set-Variable -Name "WPF$($_.Name)" -Value $Form.FindName($_.Name)
+
     })
