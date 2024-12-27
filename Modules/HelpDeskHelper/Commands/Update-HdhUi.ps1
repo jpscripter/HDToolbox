@@ -82,13 +82,14 @@ param (
 		}
 		$scriptObjects = New-Object -type collections.Arraylist
 		foreach ($script In $scripts){
-			$help = Get-Help -Path $script.FullName -Detailed
+			$help = Get-Help $script.FullName -Detailed
 			$obj = [PSCustomObject]@{
 				Name = $script.BaseName
 				FullPath = $script.FullName
 				SYNOPSIS = $help.SYNOPSIS
 				Parameters = $help.parameters.parameter.Name -join ';'
 				Folder = $script.Directory.Name
+				Output = ""
 			}
 			$Null = $scriptObjects.Add($obj)
 		}
@@ -102,6 +103,8 @@ param (
 		$NodeExpander.Uid = $node.Name + "Expander"
 		$NodeExpander.Header = $node.Name
 		$NodeExpander.Visibility = $node.Expanded
+		$NodeGrid = $NodeExpander.FindName("Template")
+		$NodeGrid.ItemsSource = $scriptObjects
 		$Parent.Children.Insert($index, $NodeExpander)
 	}
 

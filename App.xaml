@@ -36,6 +36,7 @@
                         <DataGridTextColumn Header="Name" Binding="{Binding ScriptName}" Width="200"/>
                         <DataGridTextColumn Header="Parameters" Binding="{Binding Parameters}" Width="300"/>
                         <DataGridTextColumn Header="Folder" Binding="{Binding Folder}" Width="200"/>
+                        <DataGridTextColumn Header="Output" Binding="{Binding Output}" Width="200"/>
                     </DataGrid.Columns>
                     <DataGrid.ContextMenu>
                         <ContextMenu>

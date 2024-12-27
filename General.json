@@ -20,7 +20,7 @@
         },
         {
             "Name" : "Remediation",
-            "Expanded":"Collapsed",
+            "Expanded":"Visible",
             "Scripts":".\\Remediation\\"
         }
     ],
