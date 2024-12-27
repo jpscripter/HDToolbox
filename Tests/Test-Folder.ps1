@@ -5,13 +5,13 @@ A sample script that demonstrates parameters.
 .DESCRIPTION
 This script accepts several parameters and performs some operations.
 
-.PARAMETER TestParam
+.PARAMETER Folder
 Specifies the name of a person.
 
 #>
 [CmdletBinding()]
 param (
-    $TestParam
+    $Folder
 )
-Write-Output "Restart-SMSService"
-Pause
+
+Write-Output "Exists"

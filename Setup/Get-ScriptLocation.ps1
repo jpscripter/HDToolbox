@@ -1,3 +1,0 @@
-Write-Output @{
-	"SMSSite"="Server"
-}

@@ -1,0 +1,33 @@
+{
+    "ScriptVersion": "1.0.0",
+    "Author":"JPS",
+    "CompanyName": "JPS",
+    "BannerColor": "Teal",
+    "Description": "Troubleshooting tool to help the help desk",
+    "IconPath": ".\\th.jpg",
+
+    "Height" : 800,
+    "width" : 800,
+
+    "Name": "WorkStation",
+    "VariableScript" : ".\\VariableScripts\\Workstation.ps1",
+    "LogGatherScript" : ".\\Gather\\*",
+    "Nodes": [
+        {
+            "Name" : "Tests",
+            "Expanded":"Visible",
+            "Scripts":".\\Tests\\"
+        },
+        {
+            "Name" : "Remediation",
+            "Expanded":"Collapsed",
+            "Scripts":".\\Remediation\\"
+        }
+    ],
+    "LogFiles" : [
+        "C:\\Windows\\Logs\\DISM\\"
+    ],
+    "EventLogs" : [
+        "Application"
+    ]
+}

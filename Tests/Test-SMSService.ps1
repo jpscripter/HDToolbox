@@ -13,5 +13,4 @@ Specifies the name of a person.
 param (
     $TestParam
 )
-Write-Output "Restart-SMSService"
-Pause
+Throw "Stopped"

@@ -1,3 +1,5 @@
+add-type -AssemblyName PresentationFramework
+add-type -AssemblyName PresentationCore
 
 if (Test-Path -Path $PSScriptRoot\PrivateCommands\){
     $Commands = Get-ChildItem -Path $PSScriptRoot\PrivateCommands\*.ps1 -file -Recurse

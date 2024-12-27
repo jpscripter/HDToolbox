@@ -7,54 +7,49 @@
         mc:Ignorable="d"
         Title="Help Desk Helper" Height="800" Width="800">
     <Grid>
-        <Border Background="Gray" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+        <Border Name="Banner" Background="Gray" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch">
             <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Image Source="C:\Users\jpscr\Repos\HelpDeskHelper\th.jpg" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0" Grid.Column="0"/>
-                <TextBlock Text="My Company" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Margin="10,0" Grid.Column="1"/>
-                <ComboBox Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Column="2" Margin="10,0"/>
+                <Image Name="CompanyIcon" Source="" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0" Grid.Column="0"/>
+                <TextBlock Name="CompanyName" Text="My Company" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Margin="10,0" Grid.Column="1"/>
+                <ComboBox Name="ConfigSelector" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Column="2" Margin="10,0"/>
             </Grid>
         </Border>
         <StackPanel Margin="0,35,0,0">
-            <Expander HorizontalAlignment="Stretch" Header="Variables&#xD;&#xA;" VerticalAlignment="Stretch" IsExpanded="True">
-                <DataGrid IsReadOnly="False">
+            <Expander Name="VariablesExpander" HorizontalAlignment="Stretch" Header="Variables&#xD;&#xA;" VerticalAlignment="Stretch" IsExpanded="True">
+                <DataGrid Name="Variables" IsReadOnly="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Variable Name" Width="200"/>
-                        <DataGridTextColumn Header="Value" Width="100"/>
-                        <DataGridTextColumn Header="Source" Width="200"/>
+                        <DataGridTextColumn Header="VariableName" Binding="{Binding VariableName}" Width="200"/>
+                        <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="300"/>
+                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="200"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Expander>
-            <Expander HorizontalAlignment="Stretch" Header="Tests&#xA;" VerticalAlignment="Stretch" IsExpanded="True">
-                <DataGrid  IsReadOnly="True" >
+
+            <Expander Name="TemplateExpander" HorizontalAlignment="Stretch" Header="Template&#xA;"  VerticalAlignment="Stretch"  IsExpanded="True" Visibility="Hidden" >
+                <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding ScriptName}" Width="200"/>
+                        <DataGridTextColumn Header="Parameters" Binding="{Binding Parameters}" Width="300"/>
+                        <DataGridTextColumn Header="Folder" Binding="{Binding Folder}" Width="200"/>
+                    </DataGrid.Columns>
                     <DataGrid.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Execute"/>
-                        </ContextMenu>
-                    </DataGrid.ContextMenu>
-                </DataGrid>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Header="Remediations&#xA;"  VerticalAlignment="Stretch"  IsExpanded="True">
-                <DataGrid IsReadOnly="True" SelectionMode="Single">
-                    <DataGrid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Execute"/>
+                            <MenuItem Name="TemplateExecute" Header="Execute"/>
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                 </DataGrid>
             </Expander>
 
-            <Expander HorizontalAlignment="Stretch"  Header="Logs&#xA;" VerticalAlignment="Stretch" Height="200" IsExpanded="True">
-                <DataGrid IsReadOnly="True" SelectionMode="Single"/>
+            <Expander Name="LogsExpander" HorizontalAlignment="Stretch"  Header="Logs&#xA;" VerticalAlignment="Stretch" Height="200" IsExpanded="True">
+                <DataGrid Name="Logs" IsReadOnly="True" SelectionMode="Single"/>
             </Expander>
         </StackPanel>
-        <Button Name="StartGather" Margin="100,5" Height="30" Width="70" VerticalAlignment="Bottom" HorizontalAlignment="Right">Start Gather
-        </Button>
-        <Button Name="StopGather" Margin="5,5" Height="30" Width="70" VerticalAlignment="Bottom" HorizontalAlignment="Right">Stop Gather
+        <Button Name="GatherLogs" Margin="5,5" Height="30" Width="70" VerticalAlignment="Bottom" HorizontalAlignment="Right">GatherLogs
         </Button>
     </Grid>
 </Window>
