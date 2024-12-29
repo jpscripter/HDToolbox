@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Help Desk Helper" Height="800" Width="800">
     <Grid>
-        <Border Name="Banner" Background="Gray" Height="30" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+        <!-- Banner -->
+        <Border Name="Banner" Background="Gray" Height="50" VerticalAlignment="Top" HorizontalAlignment="Stretch">
             <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -15,28 +16,38 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Image Name="CompanyIcon" Source="" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0" Grid.Column="0"/>
-                <TextBlock Name="CompanyName" Text="My Company" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Margin="10,0" Grid.Column="1"/>
+                <TextBlock Name="CompanyName" Text="My Company" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Margin="10,0" Grid.Column="1"/>
                 <ComboBox Name="ConfigSelector" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Column="2" Margin="10,0"/>
             </Grid>
         </Border>
-        <StackPanel Margin="0,35,0,0">
-            <Expander Name="VariablesExpander" HorizontalAlignment="Stretch" Header="Variables&#xD;&#xA;" VerticalAlignment="Stretch" IsExpanded="True">
-                <DataGrid Name="Variables" IsReadOnly="False">
+
+        <!-- Main Content -->
+        <Grid Name="GridRows" Margin="0,50,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Name="VariableGridRow" Height="Auto"/>   <!-- VariablesExpander row -->
+                <RowDefinition Name="LogGridRow" Height="*"/>           <!-- LogsExpander row (remaining space) -->
+                <RowDefinition Name="ButtonGridRow" Height="Auto"/>     <!-- Button row -->
+            </Grid.RowDefinitions>
+
+            <!-- Variables Expander -->
+            <Expander Name="VariablesExpander" HorizontalAlignment="Stretch" Header="Variables" VerticalAlignment="Stretch" Margin="5" FontFamily="Arial" FontSize="18" IsExpanded="True" Background="LightGray" Grid.Row="0">
+                <DataGrid Name="Variables" IsReadOnly="False" FontSize="12">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="VariableName" Binding="{Binding VariableName}" Width="200"/>
-                        <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="300"/>
-                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="200"/>
+                        <DataGridTextColumn Header="VariableName" Binding="{Binding VariableName}" Width="220" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="350" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="200" FontFamily="Verdana" FontSize="12"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Expander>
 
-            <Expander Name="TemplateExpander" HorizontalAlignment="Stretch" Header="Template&#xA;"  VerticalAlignment="Stretch"  IsExpanded="True" Visibility="Hidden" >
-                <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Single">
+            <!-- Template Expander -->
+            <Expander Name="TemplateExpander" Header="Template"  Margin="5" IsExpanded="True" FontFamily="Arial" FontSize="18" Visibility="Hidden" Background="LightGray">
+                <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Extended" FontSize="12">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" Binding="{Binding ScriptName}" Width="200"/>
-                        <DataGridTextColumn Header="Parameters" Binding="{Binding Parameters}" Width="300"/>
-                        <DataGridTextColumn Header="Folder" Binding="{Binding Folder}" Width="200"/>
-                        <DataGridTextColumn Header="Output" Binding="{Binding Output}" Width="200"/>
+                        <DataGridTextColumn Header="Name" Binding="{Binding ScriptName}" Width="200" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Parameters" Binding="{Binding Parameters}" Width="200" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Folder" Binding="{Binding Folder}" Width="100" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Output" Binding="{Binding Output}" Width="300" FontFamily="Verdana" FontSize="12"/>
                     </DataGrid.Columns>
                     <DataGrid.ContextMenu>
                         <ContextMenu>
@@ -45,12 +56,15 @@
                     </DataGrid.ContextMenu>
                 </DataGrid>
             </Expander>
-
-            <Expander Name="LogsExpander" HorizontalAlignment="Stretch"  Header="Logs&#xA;" VerticalAlignment="Stretch" Height="200" IsExpanded="True">
-                <DataGrid Name="Logs" IsReadOnly="True" SelectionMode="Single"/>
+            
+            <!-- Logs Expander -->
+            <Expander Name="LogsExpander" Header="Logs" Margin="5" FontFamily="Arial" FontSize="18" IsExpanded="True" Background="LightGray" Grid.Row="1">
+                <DataGrid Name="Logs" IsReadOnly="True" SelectionMode="Single" FontSize="12"/>
             </Expander>
-        </StackPanel>
-        <Button Name="GatherLogs" Margin="5,5" Height="30" Width="70" VerticalAlignment="Bottom" HorizontalAlignment="Right">GatherLogs
-        </Button>
+
+            <!-- Button -->
+            <Button Name="GatherLogs" Content="Gather Logs" Height="30" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5" Grid.Row="2"/>
+            
+        </Grid>
     </Grid>
 </Window>

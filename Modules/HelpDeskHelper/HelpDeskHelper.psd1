@@ -72,7 +72,9 @@
     FunctionsToExport = @(
         "Get-HdhConfigs",
         "Invoke-HdhVariableScript",
+        "Invoke-HdhScript",
         "New-HdhUi",
+        "New-HdhUiScriptsNode",
         "Update-HdhUi"
     )
     

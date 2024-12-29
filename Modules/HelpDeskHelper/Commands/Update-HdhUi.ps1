@@ -43,6 +43,7 @@ param (
 	$SelectedConfig
 )
 	$uiForm = $form.Value
+	
 	#Update Dimentions
 	$uiform.Height = $SelectedConfig.Height
 	$uiform.Width = $SelectedConfig.Height
@@ -71,42 +72,43 @@ param (
 
 	# Update Script Nodes
 	$TemplateScriptExpander = $uiform.FindName("TemplateExpander")
-	$xamlString = [System.Windows.Markup.XamlWriter]::Save($TemplateScriptExpander)
+	$GridRows = $uiform.FindName("GridRows")
+	$xamlTemplate = [System.Windows.Markup.XamlWriter]::Save($TemplateScriptExpander)
 	$parent = $TemplateScriptExpander.Parent
-	$Index = $Parent.Children.IndexOf($TemplateScriptExpander)
+	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("VariableGridRow")) 
+	$index++ 
 	Foreach ($node in $SelectedConfig.Nodes){
 		$scripts = Get-ChildItem -path $node.Scripts -Recurse -filter *.ps1
 		If ($scripts.count -lt 1){
 			Write-Warning -Message "Node ($($node.name)):No Scripts found in $($node.Scripts)"
 			Continue
 		}
-		$scriptObjects = New-Object -type collections.Arraylist
-		foreach ($script In $scripts){
-			$help = Get-Help $script.FullName -Detailed
-			$obj = [PSCustomObject]@{
-				Name = $script.BaseName
-				FullPath = $script.FullName
-				SYNOPSIS = $help.SYNOPSIS
-				Parameters = $help.parameters.parameter.Name -join ';'
-				Folder = $script.Directory.Name
-				Output = ""
-			}
-			$Null = $scriptObjects.Add($obj)
-		}
-
-		# Deserialize to create a copy
-		$reader = [System.Xml.XmlReader]::Create((New-Object System.IO.StringReader -ArgumentList $xamlString))
-		$NodeExpander = [System.Windows.Markup.XamlReader]::Load($reader)
-	
-		# Find the parent container (e.g., a StackPanel, Grid, etc.)
-		$NodeExpander.Name = $node.Name + "Expander"
-		$NodeExpander.Uid = $node.Name + "Expander"
-		$NodeExpander.Header = $node.Name
-		$NodeExpander.Visibility = $node.Expanded
-		$NodeGrid = $NodeExpander.FindName("Template")
-		$NodeGrid.ItemsSource = $scriptObjects
+		$NewRow = [System.Windows.Controls.RowDefinition]::new()
+		$NewRow.Height = "Auto"
+		$NewRow.Name = "$($node.Name)GridRow"
+		$GridRows.RowDefinitions.Insert($index ,$NewRow)
+		$nodeExpander = New-HdhUiScriptsNode -Node $node -XamlString $xamlTemplate
+		[System.Windows.Controls.Grid]::SetRow($nodeExpander,$index)
 		$Parent.Children.Insert($index, $NodeExpander)
+		$index++ 
 	}
+
+	#logs
+	$LogsExpanderGrid = $uiform.FindName("LogsExpander")
+	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("LogGridRow")) 
+	[System.Windows.Controls.Grid]::SetRow($LogsExpanderGrid,$index)
+
+	$LogsGrid = $uiform.FindName("Logs")
+	$logFiles = $SelectedConfig.LogFiles
+	$logsEntries = Get-Log -File "C:\Windows\Logs\DISM\dism.log"
+	$logs = $logsEntries[-100..-1]
+	$LogsGrid.ItemsSource = $logs
+
+	#Buttons
+	$GatherLogsButton = $uiform.FindName("GatherLogs")
+	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("ButtonGridRow")) 
+	[System.Windows.Controls.Grid]::SetRow($GatherLogsButton,$index)
+
 
 	return $UiForm
 }
