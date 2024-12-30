@@ -28,13 +28,13 @@ function Invoke-HdhScript {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [PSCustomObject]
-        $ScriptPath,
+        [PSCustomObject[]]
+        $Script,
         [PSCustomObject[]]
         $AvailableParameters
     )
 
-    if (-not $ScriptPath.Exists) {
+    if (-not (Test-Path $ScriptPath.FUllName)){
         Throw "The script path '$ScriptPath' does not exist or is not a file."
     }
 

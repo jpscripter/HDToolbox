@@ -57,14 +57,25 @@ function New-HdhUiScriptsNode {
     $NodeExpander = [System.Windows.Markup.XamlReader]::Load($reader)
 
     # Update properties of the expander
-    $NodeExpander.Name = $Node.Name + "Expander"
-    $NodeExpander.Uid = $Node.Name + "Expander"
+    $NodeExpander.Name = $Node.Name + "ScriptExpander"
+    $NodeExpander.Uid = $Node.Name + "ScriptExpander"
     $NodeExpander.Header = $Node.Name
     $NodeExpander.Visibility = $Node.Expanded
 
-    # Bind script metadata to the expander's grid
+    # UpdateGridName
     $NodeGrid = $NodeExpander.FindName("Template")
     $NodeGrid.Name = $Node.Name 
+
+    # UpdateContextMenu Name
+    $TemplateExecute = $NodeExpander.FindName("TemplateExecute")
+    $TemplateExecute.Name = $Node.Name + "Execute"
+    $TemplateExecute.Add_Click({
+        $menuItem = $_.OriginalSource
+        $contextMenu = $menuItem.Parent
+        $dataGrid = $contextMenu.PlacementTarget
+        Wait-Debugger
+        Write-Output 'test'
+    })
 
     if (-not $NodeGrid) {
         Throw "Template grid not found in the expander."

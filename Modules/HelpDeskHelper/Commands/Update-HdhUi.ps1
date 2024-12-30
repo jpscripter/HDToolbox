@@ -40,7 +40,9 @@ param (
 	$configs,
 
 	[PSCustomObject]
-	$SelectedConfig
+	$SelectedConfig,
+
+	[Switch] $Update
 )
 	$uiForm = $form.Value
 	
@@ -62,7 +64,14 @@ param (
 	#Update Configuration 
 	$UiConfigSelector = $UiForm.FindName('ConfigSelector')
 	$UiConfigSelector.ItemsSource = [String[]]$configs.name
-	$UiConfigSelector.SelectedIndex = $Configs.Name.IndexOf($selectedConfig.name)
+	If(-not ($Update.IsPresent)){
+		$UiConfigSelector.SelectedIndex = $Configs.Name.IndexOf($selectedConfig.name)
+		$UiConfigSelector.Add_SelectionChanged({
+			$selection = $_.Source.SelectedItem 
+			$selectedConfig = $configs.Where({$PSItem.Name -eq $selection})
+			Update-HdhUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs -Update
+		})
+	}
 
 	#update Variables 
 	$variableScript = Get-Item -path $selectedConfig.VariableScript
@@ -71,6 +80,7 @@ param (
 	$variablesGrid.ItemsSource = $AvailableVariables
 
 	# Update Script Nodes
+	Remove-HdhUiScriptsNode -Form ([Ref]$UiForm) #Remove old script nodes
 	$TemplateScriptExpander = $uiform.FindName("TemplateExpander")
 	$GridRows = $uiform.FindName("GridRows")
 	$xamlTemplate = [System.Windows.Markup.XamlWriter]::Save($TemplateScriptExpander)
@@ -109,6 +119,4 @@ param (
 	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("ButtonGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($GatherLogsButton,$index)
 
-
-	return $UiForm
 }

@@ -67,6 +67,3 @@ Update-HdhUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $conf
 #endregion
 
 $uiform.ShowDialog()
-
-#region Make Xaml Object
-$WindowXamlText = Get-Content -raw -Path "$ScriptRoot\App.xaml"

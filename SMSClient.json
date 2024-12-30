@@ -1,0 +1,28 @@
+{
+    "ScriptVersion": "1.0.0",
+    "Author":"JPS",
+    "CompanyName": "JPS",
+    "BannerColor": "Teal",
+    "Description": "Troubleshooting tool to help the help desk",
+    "IconPath": ".\\th.jpg",
+
+    "Height" : 800,
+    "width" : 800,
+
+    "Name": "SMSClient",
+    "VariableScript" : ".\\VariableScripts\\ConfigMgrClient.ps1",
+    "LogGatherScript" : ".\\Gather\\*",
+    "Nodes": [
+        {
+            "Name" : "Remediation",
+            "Expanded":"Visible",
+            "Scripts":".\\Remediation\\"
+        }
+    ],
+    "LogFiles" : [
+        "C:\\Windows\\Logs\\DISM\\"
+    ],
+    "EventLogs" : [
+        "Application"
+    ]
+}
