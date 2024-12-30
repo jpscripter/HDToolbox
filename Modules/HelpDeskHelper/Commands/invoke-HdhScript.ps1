@@ -43,7 +43,7 @@ function Invoke-HdhScript {
         # Create a runspace and script block
         $runspace = [powershell]::Create()
         $AddedCommand = $runspace.AddScript([System.IO.File]::ReadAllText($Script.FullPath))
-        $runspace = $Script:runspacePool
+        $runspace.RunspacePool = $Script:runspacePool
 
         # add params to runspace
         :params foreach ($param in $script.Parameters.Split(';')){
@@ -57,8 +57,15 @@ function Invoke-HdhScript {
 
         #run
         $AddedCommand.BeginInvoke()
+        Write-Debug "'$($Script.FullPath)' Executed"
 
         #add to Hashset
-        $script:syncHash["RunningScripts"].Add($runspace.InstanceId,$script)
+        try{
+            $script:syncHash["RunningScripts"].Add($runspace.InstanceId.guid,$script)
+        }
+        catch{
+            wait-debugger
+            Write-Error $PSitem -ErrorAction continue
+        }
     }
 }
