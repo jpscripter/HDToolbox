@@ -47,6 +47,7 @@ function New-HdhUiScriptsNode {
             Synopsis   = $help.SYNOPSIS
             Parameters = $help.Parameters.Parameter.Name -join ';'
             Folder     = $script.Directory.Name
+            Grid       = $Node.Name + "ScriptExpander"
             Output     = ""
         }
         $null = $scriptObjects.Add($obj)
@@ -70,11 +71,12 @@ function New-HdhUiScriptsNode {
     $TemplateExecute = $NodeExpander.FindName("TemplateExecute")
     $TemplateExecute.Name = $Node.Name + "Execute"
     $TemplateExecute.Add_Click({
-        $menuItem = $_.OriginalSource
+        $menuItem = $PSItem.OriginalSource
         $contextMenu = $menuItem.Parent
         $dataGrid = $contextMenu.PlacementTarget
-        Wait-Debugger
-        Write-Output 'test'
+        $SelectedScripts = $dataGrid.SelectedItems 
+        $variablesGrid = $uiform.FindName("Variables") 
+        Invoke-HdhScript -SelectedScripts $SelectedScripts -AvailableParameters $variablesGrid.Items
     })
 
     if (-not $NodeGrid) {

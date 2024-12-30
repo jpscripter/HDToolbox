@@ -100,6 +100,22 @@ param (
 		$nodeExpander = New-HdhUiScriptsNode -Node $node -XamlString $xamlTemplate
 		[System.Windows.Controls.Grid]::SetRow($nodeExpander,$index)
 		$Parent.Children.Insert($index, $NodeExpander)
+
+		#Add Variables
+		$variablesGrid = $uiform.FindName("Variables") 
+		:script foreach($script in $nodeExpander.Content.Items){
+			:parameter foreach ($param in $script.Parameters.Split(';')){
+				if ($variablesGrid.items.VariableName -contains $param){
+					Continue parameter
+				}
+				$variablesGrid.itemsSource += ([PSCustomObject]@{
+					VariableName = $param
+					Value = ''
+					Source = $script.name
+				})
+			}
+		}
+
 		$index++ 
 	}
 

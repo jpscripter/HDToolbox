@@ -75,6 +75,7 @@
         "Invoke-HdhScript",
         "New-HdhUi",
         "New-HdhUiScriptsNode",
+        "Remove-HdhUiScriptsNode",
         "Update-HdhUi"
     )
     

@@ -7,7 +7,7 @@ The Invoke-HdhScript cmdlet runs a PowerShell script located at a specified path
 This approach allows for script execution without affecting the main session.
 Results are captured and returned as a hashtable.
 
-.PARAMETER Script
+.PARAMETER SelectedScripts
 Specifies the Script Object in the ui to to execute. The file must exist and be accessible.
 
 .PARAMETER AvailableParameters
@@ -29,51 +29,36 @@ function Invoke-HdhScript {
     param (
         [Parameter(Mandatory = $true)]
         [PSCustomObject[]]
-        $Script,
+        $SelectedScripts,
         [PSCustomObject[]]
         $AvailableParameters
     )
 
-    if (-not (Test-Path $ScriptPath.FUllName)){
-        Throw "The script path '$ScriptPath' does not exist or is not a file."
-    }
-
-    # Create a runspace and script block
-    $runspace = [powershell]::Create()
-    $null = $runspace.AddScript([System.IO.File]::ReadAllText($ScriptPath))
-   
-    $result = New-Object collections.arraylist
-    try {
-        # Open the runspace and invoke the script
-        $Output = $runspace.Invoke()
-
-        # Capture output as a hashtable
-        $Output.Foreach({
-            if ($psitem.Keys.count -gt 0)
-            {
-                try{
-                    $ScriptResult += $psitem
-                }
-                catch{
-                    Write-Warning $psitem
-                }
-            }
-        })
-
-        foreach ($key in $ScriptResult.keys){
-            $obj = [PSCustomObject]@{
-                VariableName = $key 
-                Value = $scriptResult[$key]
-                Source = $ScriptPath.BaseName
-            }
-            $null = $result.add($obj)
+    :script foreach ($script in $SelectedScripts){
+        if (-not (Test-Path $Script.FullPath)){
+            Write-Warning "The script path '$($Script.FullPath)' does not exist or is not a file."
+            Continue script
         }
 
-    } catch {
-        Write-Warning $psitem
-    } finally {
-        $runspace.Dispose()
-    }
+        # Create a runspace and script block
+        $runspace = [powershell]::Create()
+        $AddedCommand = $runspace.AddScript([System.IO.File]::ReadAllText($Script.FullPath))
+        $runspace = $Script:runspacePool
 
-    return $result
+        # add params to runspace
+        :params foreach ($param in $script.Parameters.Split(';')){
+            $MatchingParam = $AvailableParameters.where({$PSitem.VariableName -eq $param})
+            if (($null -eq $matchingParam) -or [string]::IsNullOrWhiteSpace($matchingParam.value))
+            {
+                continue params
+            }
+            $AddedCommand.AddParameter($param, $MatchingParam.Value)
+        }
+
+        #run
+        $AddedCommand.BeginInvoke()
+
+        #add to Hashset
+        $script:syncHash["RunningScripts"].Add($runspace.InstanceId,$script)
+    }
 }
