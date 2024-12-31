@@ -1,8 +1,8 @@
 {
     "ScriptVersion": "1.0.0",
     "Author":"JPS",
-    "CompanyName": "JPS",
-    "BannerColor": "Teal",
+    "CompanyName": "My Company",
+    "BannerColor": "Gray",
     "Description": "Troubleshooting tool to help the help desk",
     "IconPath": ".\\th.jpg",
 
@@ -22,6 +22,7 @@
     "LogFiles" : [
         "C:\\Windows\\Logs\\DISM\\"
     ],
+    "LogLookback" : "01:00:00",
     "EventLogs" : [
         "Application"
     ]

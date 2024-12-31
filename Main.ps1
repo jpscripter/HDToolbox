@@ -35,10 +35,16 @@ param (
     $OutputPath
 )
 
+
+import-module .\logParsing\LogParsing.psd1 -Force
+cd .\HelpDeskHelper\
+#>
+
 #region Setup
 $ErrorActionPreference = 'Stop'
 add-type -AssemblyName PresentationFramework
 add-type -AssemblyName PresentationCore
+Add-Type -AssemblyName System.Windows.Forms
 [io.DirectoryInfo]$ScriptRoot = (get-location).path #$PSScriptRoot
 $env:PSModulePath += ";$($ScriptRoot.FullName)\Modules"
 Import-module HelpDeskHelper -force

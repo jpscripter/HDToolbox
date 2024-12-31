@@ -121,14 +121,21 @@ param (
 
 	#logs
 	$LogsExpanderGrid = $uiform.FindName("LogsExpander")
+	$GridRows = $uiform.FindName("GridRows")
 	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("LogGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($LogsExpanderGrid,$index)
+	Update-HdhLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig
 
-	$LogsGrid = $uiform.FindName("Logs")
-	$logFiles = $SelectedConfig.LogFiles
-	$logsEntries = Get-Log -File "C:\Windows\Logs\DISM\dism.log"
-	$logs = $logsEntries[-100..-1]
-	$LogsGrid.ItemsSource = $logs
+	#Update on timer
+	if (-not ($Update.IsPresent)){
+		$Timer = New-Object System.Windows.Forms.Timer
+		$Timer.Interval = 1000  # Timer interval in milliseconds (1000 ms = 1 second)
+		$Timer.Add_Tick({
+			# Update the label text with the current time
+			Update-HdhLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig -Update
+		})
+		$Timer.Start()
+	}
 
 	#Buttons
 	$GatherLogsButton = $uiform.FindName("GatherLogs")

@@ -8,7 +8,7 @@
         Title="Help Desk Helper" Height="800" Width="800">
     <Grid>
         <!-- Banner -->
-        <Border Name="Banner" Background="Gray" Height="50" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+        <Border Name="Banner" Background="Gray" Height="40" VerticalAlignment="Top" HorizontalAlignment="Stretch">
             <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -22,7 +22,7 @@
         </Border>
 
         <!-- Main Content -->
-        <Grid Name="GridRows" Margin="0,50,0,0">
+        <Grid Name="GridRows" Margin="0,40,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Name="VariableGridRow" Height="Auto"/>   <!-- VariablesExpander row -->
                 <RowDefinition Name="LogGridRow" Height="*"/>           <!-- LogsExpander row (remaining space) -->
@@ -37,9 +37,38 @@
                         <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="350" FontFamily="Verdana" FontSize="12"/>
                         <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="200" FontFamily="Verdana" FontSize="12"/>
                     </DataGrid.Columns>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Name="VariableNew" Header="Add"/>
+                            <MenuItem Name="VariableCopy" Header="Copy"/>
+                            <MenuItem Name="VariableDelete" Header="Delete"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+            </Expander>
+            
+            <!-- Logs Expander -->
+            <Expander Name="LogsExpander" Header="Logs" Margin="5" FontFamily="Arial" FontSize="18" IsExpanded="True" Background="LightGray" Grid.Row="1">
+                <DataGrid Name="Logs" IsReadOnly="True" SelectionMode="Single" FontSize="12">
+                   <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <!-- Change row background color if Status is 'Error' -->
+                                <DataTrigger Binding="{Binding severity}" Value="Error">
+                                    <Setter Property="Background" Value="Red" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding severity}" Value="Warning">
+                                    <Setter Property="Background" Value="Yellow" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>    
                 </DataGrid>
             </Expander>
 
+            <!-- Button -->
+            <Button Name="GatherLogs" Content="Gather Logs" Height="30" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5" Grid.Row="2"/>
+            
             <!-- Template Expander -->
             <Expander Name="TemplateExpander" Header="Template"  Margin="5" IsExpanded="True" FontFamily="Arial" FontSize="18" Visibility="Hidden" Background="LightGray">
                 <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Extended" FontSize="12">
@@ -56,15 +85,6 @@
                     </DataGrid.ContextMenu>
                 </DataGrid>
             </Expander>
-            
-            <!-- Logs Expander -->
-            <Expander Name="LogsExpander" Header="Logs" Margin="5" FontFamily="Arial" FontSize="18" IsExpanded="True" Background="LightGray" Grid.Row="1">
-                <DataGrid Name="Logs" IsReadOnly="True" SelectionMode="Single" FontSize="12"/>
-            </Expander>
-
-            <!-- Button -->
-            <Button Name="GatherLogs" Content="Gather Logs" Height="30" Width="100" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5" Grid.Row="2"/>
-            
         </Grid>
     </Grid>
 </Window>

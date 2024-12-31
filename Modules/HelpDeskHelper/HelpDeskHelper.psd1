@@ -76,6 +76,7 @@
         "New-HdhUi",
         "New-HdhUiScriptsNode",
         "Remove-HdhUiScriptsNode",
+        "Update-HdhLogs",
         "Update-HdhUi"
     )
     
