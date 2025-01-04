@@ -15,12 +15,12 @@ The XAML template string used to create the expander UI element.
 A WPF expander object populated with script metadata.
 
 .EXAMPLE
-$expander = New-HdhUiScriptsNode -Node $node -XamlString $xamlString
+$expander = New-HdtUiScriptsNode -Node $node -XamlString $xamlString
 
 .NOTES
 Ensure the node object contains valid script paths and the XAML template is well-formed.
 #>
-function New-HdhUiScriptsNode {
+function New-HdtUiScriptsNode {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Retrieves the specified configuration file for the HelpdeskHelper tool.
+Retrieves the specified configuration file for the HDToolbox tool.
 
 .DESCRIPTION
 This script locates and returns the content of a targeted configuration file. The configuration file defines the settings for specific operations, including associated log files and PowerShell scripts for troubleshooting.  
@@ -8,20 +8,20 @@ This script locates and returns the content of a targeted configuration file. Th
 The script supports searching in default and custom directories and can validate the existence of the configuration file before proceeding.
 
 .EXAMPLE
-Get-HdhConfigs.ps1 
+Get-HdtConfigs.ps1 
 Retrieves the configuration 
 
 .NOTES
 Version: 1.0  
 Author: JPS
-Created: 12/24/2024
+Created: 1/4/2024
 
 This script assumes that configuration files are stored in JSON or XML format.
 
 .LINK
 TBD
 #>
-Function Get-HdhConfigs {
+Function Get-HdtConfigs {
 	[CmdletBinding()]
 	param (
 		[Parameter()]

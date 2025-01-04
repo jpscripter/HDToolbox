@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-Updates the graphical user interface (GUI) for managing the HelpdeskHelper tool.
+Updates the graphical user interface (GUI) for managing the HDToolbox tool.
 
 .DESCRIPTION
-This script Updates a user-friendly GUI for interacting with the HelpdeskHelper tool. The interface allows helpdesk teams to select configurations, browse log files, and execute associated PowerShell scripts without needing to use the command line.  
+This script Updates a user-friendly GUI for interacting with the HDToolbox tool. The interface allows helpdesk teams to select configurations, browse log files, and execute associated PowerShell scripts without needing to use the command line.  
 
 Users can also view outputs and save processed results directly from the GUI.  
 
@@ -14,7 +14,7 @@ The base Window object to update
 The Selected Config Object
 
 .EXAMPLE
-Update-HdhLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig
+Update-HdtLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig
 
 .NOTES
 Version: 1.0  
@@ -26,7 +26,7 @@ This script uses Windows Presentation Foundation (WPF) or Windows Forms for buil
 .LINK
 TBD
 #>
-Function Update-HdhLogs {
+Function Update-HdtLogs {
 [CmdletBinding()]
 param (
 	[Ref]
@@ -99,8 +99,8 @@ param (
 			}
 		}
 		#if last selected, keep scrolling
-		If ($KeepScrolling){
-			$LogsGrid.SelectedIndex = $Script:logsEntries.Count -1
+		If ($KeepScrolling -and ($Script:logsEntries.Count -gt 1)){
+			$LogsGrid.SelectedIndex = $Script:logsEntries.Count - 1
 			$LogsGrid.ScrollIntoView($Script:logsEntries[-1])
 		}
 	}

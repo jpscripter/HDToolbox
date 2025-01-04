@@ -9,10 +9,10 @@ This cmdlet Reverts and removes UI expanders for a given node
 The Form ref object 
 
 .EXAMPLE
-Remove-HdhUiScriptsNode -form ([ref]$UIForm)
+Remove-HdtUiScriptsNode -form ([ref]$UIForm)
 
 #>
-function Remove-HdhUiScriptsNode {
+function Remove-HdtUiScriptsNode {
     [CmdletBinding()]
     param (
         [Ref]

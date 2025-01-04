@@ -12,23 +12,24 @@ Specifies the configuration to use. Each configuration is tied to a specific set
 Optional. Specifies where to save processed log outputs. Defaults to the current directory if not specified.
 
 .EXAMPLE
-HelpdeskHelper -Config "ErrorLogs" -OutputPath "C:\ProcessedLogs"
+invoke-HDToolbox  -Config ".\Example" -OutputPath "C:\ProcessedLogs"
 Processes the logs and runs the associated script for the "ErrorLogs" configuration. Outputs the result to the specified directory.
 
 .NOTES
 Version: 1.0  
 Author: Jeff Scripter
-Created: 12/22/2024
+Created: 1/4/2025
 
 .LINK
 TBD
 #>
 
+function  invoke-HDToolbox {
 [CmdletBinding()]
 param (
     [Parameter()]
     [string]
-    $Config,
+    $Config = (get-location),
 
     [Parameter()]
     [io.DirectoryInfo]
@@ -36,18 +37,10 @@ param (
 )
 
 
-import-module .\logParsing\LogParsing.psd1 -Force
-cd .\HelpDeskHelper\
-#>
-
 #region Setup
-$ErrorActionPreference = 'Stop'
-add-type -AssemblyName PresentationFramework
-add-type -AssemblyName PresentationCore
-Add-Type -AssemblyName System.Windows.Forms
 [io.DirectoryInfo]$ScriptRoot = (get-location).path #$PSScriptRoot
 $env:PSModulePath += ";$($ScriptRoot.FullName)\Modules"
-Import-module HelpDeskHelper -force
+
 #endregion
 
 #region Initial UI setup
@@ -65,11 +58,12 @@ If (![String]::IsNullOrWhiteSpace($config)){
     }
 }
 
-$UiForm = New-HdhUi -ScriptRoot $ScriptRoot 
+$UiForm = New-HdtUi -ScriptRoot $ScriptRoot 
 #endregion
 
 #region Config UI 
-Update-HdhUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs
+Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs
 #endregion
 
 $uiform.ShowDialog()
+}

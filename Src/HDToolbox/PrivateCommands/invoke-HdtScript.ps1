@@ -3,7 +3,7 @@
 Executes a PowerShell script in a separate runspace and returns the results as a hashtable.
 
 .DESCRIPTION
-The Invoke-HdhScript cmdlet runs a PowerShell script located at a specified path in an isolated runspace.
+The Invoke-HdtScript cmdlet runs a PowerShell script located at a specified path in an isolated runspace.
 This approach allows for script execution without affecting the main session.
 Results are captured and returned as a hashtable.
 
@@ -24,7 +24,7 @@ Runs the script located at the specified path and returns the results in a hasht
 .NOTES
 Ensure the script file exists and has the necessary permissions before invoking this cmdlet.
 #>
-function Invoke-HdhScript {
+function Invoke-HdtScript {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]

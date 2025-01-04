@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-Provides a graphical user interface (GUI) for managing the HelpdeskHelper tool.
+Provides a graphical user interface (GUI) for managing the HDToolbox tool.
 
 .DESCRIPTION
-This script creates a user-friendly GUI for interacting with the HelpdeskHelper tool. The interface allows helpdesk teams to select configurations, browse log files, and execute associated PowerShell scripts without needing to use the command line.  
+This script creates a user-friendly GUI for interacting with the HDToolbox tool. The interface allows helpdesk teams to select configurations, browse log files, and execute associated PowerShell scripts without needing to use the command line.  
 
 Users can also view outputs and save processed results directly from the GUI.  
 
@@ -23,18 +23,16 @@ This script uses Windows Presentation Foundation (WPF) or Windows Forms for buil
 .LINK
 TBD
 #>
-Function New-HdhUi {
+Function New-HdtUi {
 [CmdletBinding()]
 param (
 	[Parameter()]
 	[io.DirectoryInfo]
 	$ScriptRoot
 )
-
-	[io.FileInfo[]]$xamlFile = Get-ChildItem -Path $ScriptRoot.FullName -Filter *.xaml
-	try{
-		$selectedXaml = $xamlFile[0]
-	}catch{
+	$myModulePath = Get-Module HDToolbox
+	[io.FileInfo]$selectedXaml = "$($myModulePath.ModuleBase)\app.xaml"
+	if ($selectedXaml.exists){
 		Throw "No Xaml Files found in $($scriptRoot)"
 	}
 	#region Get UI Template

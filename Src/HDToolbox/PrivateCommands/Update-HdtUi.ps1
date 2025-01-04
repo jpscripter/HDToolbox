@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-Updates the graphical user interface (GUI) for managing the HelpdeskHelper tool.
+Updates the graphical user interface (GUI) for managing the HDToolbox tool.
 
 .DESCRIPTION
-This script Updates a user-friendly GUI for interacting with the HelpdeskHelper tool. The interface allows helpdesk teams to select configurations, browse log files, and execute associated PowerShell scripts without needing to use the command line.  
+This script Updates a user-friendly GUI for interacting with the HDToolbox tool. The interface allows helpdesk teams to select configurations, browse log files, and execute associated PowerShell scripts without needing to use the command line.  
 
 Users can also view outputs and save processed results directly from the GUI.  
 
@@ -18,7 +18,7 @@ The Selected Config Object
 
 
 .EXAMPLE
-Update-HdhUi -SelectedConfig $SelectedConfig
+Update-HdtUi -SelectedConfig $SelectedConfig
 
 .NOTES
 Version: 1.0  
@@ -51,7 +51,7 @@ param (
 	$uiform.Width = $SelectedConfig.Height
 
 	#Update branding
-	$UiForm.Title = "HelpDeskHelper for $($SelectedConfig.CompanyName)"
+	$UiForm.Title = "$($SelectedConfig.CompanyName) HelpDesk Toolbox"
 	$CompanyIcon = Get-Item -Path $SelectedConfig.IconPath
 	$UiIcon = $uiform.FindName("CompanyIcon") 
 	$UiIcon.Source = $CompanyIcon.FullName
@@ -69,18 +69,18 @@ param (
 		$UiConfigSelector.Add_SelectionChanged({
 			$selection = $_.Source.SelectedItem 
 			$selectedConfig = $configs.Where({$PSItem.Name -eq $selection})
-			Update-HdhUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs -Update
+			Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs -Update
 		})
 	}
 
 	#update Variables 
 	$variableScript = Get-Item -path $selectedConfig.VariableScript
 	$variablesGrid = $uiform.FindName("Variables") 
-	[PSCustomObject[]]$AvailableVariables = Invoke-HdhVariableScript -ScriptPath $variableScript.FullName
+	[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript.FullName
 	$variablesGrid.ItemsSource = $AvailableVariables
 
 	# Update Script Nodes
-	Remove-HdhUiScriptsNode -Form ([Ref]$UiForm) #Remove old script nodes
+	Remove-HdtUiScriptsNode -Form ([Ref]$UiForm) #Remove old script nodes
 	$TemplateScriptExpander = $uiform.FindName("TemplateExpander")
 	$GridRows = $uiform.FindName("GridRows")
 	$xamlTemplate = [System.Windows.Markup.XamlWriter]::Save($TemplateScriptExpander)
@@ -97,7 +97,7 @@ param (
 		$NewRow.Height = "Auto"
 		$NewRow.Name = "$($node.Name)GridRow"
 		$GridRows.RowDefinitions.Insert($index ,$NewRow)
-		$nodeExpander = New-HdhUiScriptsNode -Node $node -XamlString $xamlTemplate
+		$nodeExpander = New-HdtUiScriptsNode -Node $node -XamlString $xamlTemplate
 		[System.Windows.Controls.Grid]::SetRow($nodeExpander,$index)
 		$Parent.Children.Insert($index, $NodeExpander)
 
@@ -115,7 +115,6 @@ param (
 				})
 			}
 		}
-
 		$index++ 
 	}
 
@@ -132,7 +131,7 @@ param (
 		$Timer.Interval = 1000  # Timer interval in milliseconds (1000 ms = 1 second)
 		$Timer.Add_Tick({
 			# Update the label text with the current time
-			Update-HdhLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig -Update
+			Update-HdtLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig -Update
 		})
 		$Timer.Start()
 	}

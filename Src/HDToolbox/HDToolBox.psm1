@@ -1,5 +1,6 @@
 add-type -AssemblyName PresentationFramework
 add-type -AssemblyName PresentationCore
+Add-Type -AssemblyName System.Windows.Forms
 
 if (Test-Path -Path $PSScriptRoot\PrivateCommands\){
     $Commands = Get-ChildItem -Path $PSScriptRoot\PrivateCommands\*.ps1 -file -Recurse

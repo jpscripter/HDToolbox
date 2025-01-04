@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="Help Desk Helper" Height="800" Width="800">
+        Title="Help Desk Toolbox" Height="800" Width="800">
     <Grid>
         <!-- Banner -->
         <Border Name="Banner" Background="Gray" Height="40" VerticalAlignment="Top" HorizontalAlignment="Stretch">
