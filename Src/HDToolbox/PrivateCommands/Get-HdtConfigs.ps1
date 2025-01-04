@@ -26,17 +26,18 @@ Function Get-HdtConfigs {
 	param (
 		[Parameter()]
 		[io.DirectoryInfo]
-		$ScriptRoot = '.'
+		$Source 
 	)
 	$Configs = New-Object Collections.Arraylist
 
 	#If no config is passed in
-	$configFiles = Get-ChildItem -Path "$($ScriptRoot.FullName)\*" -Filter *.json
+	$configFiles = Get-ChildItem -Path "$($Source.FullName)\*" -Filter *.json
 	Foreach ($configFile in $configFiles){
 		$configContent = Get-Content -Raw $configFile
 		Write-Debug -Message "Reading $($ConfigFile.FullName)"
 		Try{
 			$configObject = ConvertFrom-Json -InputObject $configContent
+			$null = Add-Member -inputObject $configObject -name ConfigDirectory -value $configFile.Directory -Type NoteProperty
 			$null = $configs.Add($configObject)
 			Write-Debug -Message "`t Adding $($configObject.Name)"
 		}

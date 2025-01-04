@@ -49,12 +49,17 @@ param (
 	}
 
 	#get list of logs in variables
-	$LogLookback = [TimeSpan]$SelectedConfig.LogLookback
+	try{
+		$LogLookback = [int]$SelectedConfig.LogLookback
+	}catch{
+		Write-warning -message "Can not convert LogLookback $($SelectedConfig.LogLookback) to int"
+		$LogLookback = 24
+	}
 	[PSCustomobject[]]$VariableLogs = $uiform.FindName("Variables").ItemsSource.Where({$psitem.VariableName -Like "Log*"}).Value
 	:LogFiles foreach($log in ($VariableLogs + $SelectedConfig.LogFiles)){
 		if (-not (Test-Path -Path $log))
 		{
-			Write-warning -Message "Config Log [$($log)] not found"
+			Write-Debug -Message "Config Log [$($log)] not found"
 			Continue LogFiles
 		}
 
@@ -62,10 +67,10 @@ param (
 		$logItem = Get-Item -Path $log
 		if ($logItem.Attributes -contains "Directory"){
 			[io.Fileinfo[]]$logChildItems = Get-ChildItem -Path $logItem.FullName -Filter *.log -Recurse -File
-			$logChildItems = $logChildItems.Where({(get-date) -lt ($PSItem.LastWriteTime.add($LogLookback))})
+			$logChildItems = $logChildItems.Where({(get-date) -lt ($PSItem.LastWriteTime.AddHours($LogLookback))})
 			$logfiles.AddRange($logChildItems)
 		}else{
-			If ((get-date) -lt ($logItem.LastWriteTime.add($LogLookback))){
+			If ((get-date) -lt ($logItem.LastWriteTime.AddHours($LogLookback))){
 				Write-Debug -Message "Config Log [$($log)] too old"
 				Continue LogFiles
 			}
@@ -76,7 +81,18 @@ param (
 
 		
 	#get Entries from logs
-	$LogLookback = [TimeSpan]$SelectedConfig.LogLookback
+	try{
+		$LogLookback = [int]$SelectedConfig.LogLookback
+	}catch{
+		Write-warning -message "Can not convert LogLookback $($SelectedConfig.LogLookback) to int"
+		$LogLookback = -24
+	}
+	try{
+		$LogTailLength = [int]$SelectedConfig.LogTailLength
+	}catch{
+		Write-warning -message "Can not convert LogTailLength $($SelectedConfig.LogTailLength) to int"
+		$LogTailLength = 0
+	}
 	:LogFiles Foreach ($log in $SelectedConfig.EventLogs){
 		#$EventLogEntries = Get-CimInstance 
 	}
@@ -84,12 +100,15 @@ param (
 	$KeepScrolling = $LogsGrid.ItemsSource.Count -le ($LogsGrid.SelectedIndex + 2)
 	foreach($log in $logFiles){
 		$params = @{}
+		if ($LogTailLength -ne 0){
+			$params.add('Tail',$LogTailLength)
+		}
 		if ($update.IsPresent){
 			$params.add('NewContentOnly',$true)
 		}
 		[pscustomObject[]]$entries = Get-Log -File $Log @params
 		if (-not ($update.IsPresent)){
-			$entries = $entries.Where({(get-date) -lt ($PSItem.DateTime.add($LogLookback))})
+			$entries = $entries.Where({(get-date) -lt ($PSItem.DateTime.AddHours($LogLookback))})
 		}
 		if ($entries.count -gt 0){
 			try{

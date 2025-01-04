@@ -3,7 +3,7 @@
 Executes a PowerShell script in a separate runspace and returns the results as a hashtable.
 
 .DESCRIPTION
-The Invoke-HdhVariableScript cmdlet runs a PowerShell script located at a specified path in an isolated runspace.
+The Invoke-HdtVariableScript cmdlet runs a PowerShell script located at a specified path in an isolated runspace.
 This approach allows for script execution without affecting the main session.
 Results are captured and returned as a hashtable.
 
@@ -15,14 +15,14 @@ Hashtable
 A hashtable containing the script returned variables
 
 .EXAMPLE
-Invoke-HdhVariableScript -ScriptPath "C:\Scripts\MyScript.ps1"
+Invoke-HdtVariableScript -ScriptPath "C:\Scripts\MyScript.ps1"
 
 Runs the script located at the specified path and returns the results in a hashtable.
 
 .NOTES
 Ensure the script file exists and has the necessary permissions before invoking this cmdlet.
 #>
-function Invoke-HdhVariableScript {
+function Invoke-HdtVariableScript {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]

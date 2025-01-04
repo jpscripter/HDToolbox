@@ -22,7 +22,7 @@
     "LogFiles" : [
         "C:\\Windows\\Logs\\DISM\\"
     ],
-    "LogLookback" : "01:00:00",
+    "LogLookback" : "12",
     "EventLogs" : [
         "Application"
     ]

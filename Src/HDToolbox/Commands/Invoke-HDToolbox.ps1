@@ -27,43 +27,57 @@ TBD
 function  invoke-HDToolbox {
 [CmdletBinding()]
 param (
-    [Parameter()]
     [string]
-    $Config = (get-location),
+    $ConfigSource = (get-location),
 
-    [Parameter()]
+    [string]
+    $InitialConfig,
+
     [io.DirectoryInfo]
     $OutputPath
 )
 
-
-#region Setup
-[io.DirectoryInfo]$ScriptRoot = (get-location).path #$PSScriptRoot
-$env:PSModulePath += ";$($ScriptRoot.FullName)\Modules"
-
-#endregion
-
-#region Initial UI setup
-[object[]]$Configs = Get-hdhConfigs -ScriptRoot $ScriptRoot
-try{
-    $selectedConfig = $Configs[0]
-}
-catch {
-    Throw "No Config Found"
-}
-If (![String]::IsNullOrWhiteSpace($config)){
-    $selectedConfig = $Configs.Where({$psitem.name -eq $config})
-    if ($selectedConfig.count -eq 0) {
-        Throw "Selected $Config not found in $($scriptRoot)"
+    #region setup Config
+    Write-Debug -Message "HDToolbox is using $ConfigSource"
+    [io.directoryInfo]$ConfigSourceDirectory
+    if ($ConfigSource.StartsWith('HTTP')){
+        Write-Debug -Message "HDToolbox found a remote config. Downloading..."
+        $ConfigSourceDirectory = $null
+    }else{
+        $ConfigSourceDirectory = get-Item -path $ConfigSource 
     }
-}
 
-$UiForm = New-HdtUi -ScriptRoot $ScriptRoot 
-#endregion
+    Write-verbose -Message "HDToolbox Local Config location:  $($ConfigSourceDirectory.FullName)"
+    $configsModulePath = "$($ConfigSourceDirectory.FullName)\Modules"
+    if (-not ($env:PSModulePath.split(';') -contains $configsModulePath)){
+        Write-Debug -Message "HDToolbox Local Config location:  $($ConfigSourceDirectory.FullName)"
+        $env:PSModulePath += ";$configsModulePath"
+    }
+    #endregion
 
-#region Config UI 
-Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs
-#endregion
+    #region Initial UI setup
+    [object[]]$Configs = Get-hdtConfigs -Source $ConfigSourceDirectory
+    try{
+        Write-Debug -Message "HDToolbox found $($Configs.count) Configs"
+        $selectedConfig = $Configs[0]
+        Write-verbose -Message "HDToolbox starting with $($selectedConfig.Name) Config"
+    }
+    catch {
+        Throw "No Config Found"
+    }
+    If (![String]::IsNullOrWhiteSpace($InitialConfig)){
+        $selectedConfig = $Configs.Where({$psitem.name -eq $config})
+        if ($selectedConfig.count -eq 0) {
+            Throw "Selected $Config not found in $($scriptRoot)"
+        }
+    }
 
-$uiform.ShowDialog()
+    $UiForm = New-HdtUi -ScriptRoot $ScriptRoot 
+    #endregion
+
+    #region Config UI 
+    Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs
+    #endregion
+
+    $uiform.ShowDialog()
 }

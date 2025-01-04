@@ -30,7 +30,7 @@ This script uses Windows Presentation Foundation (WPF) or Windows Forms for buil
 .LINK
 TBD
 #>
-Function Update-HdhUi {
+Function Update-HdtUi {
 [CmdletBinding()]
 param (
 	[Ref]
@@ -45,12 +45,18 @@ param (
 	[Switch] $Update
 )
 	$uiForm = $form.Value
+	push-location -Path $SelectedConfig.ConfigDirectory
 	
 	#Update Dimentions
-	$uiform.Height = $SelectedConfig.Height
-	$uiform.Width = $SelectedConfig.Height
-
+	if ($Null -ne $SelectedConfig.Height){
+		$uiform.Height = $SelectedConfig.Height
+	}
+	if ($Null -ne $SelectedConfig.Width){
+		$uiform.Width = $SelectedConfig.Width
+	}
+	
 	#Update branding
+	Write-verbose -Message "HDToolbox Customizing UI for $($selectedConfig.CompanyName)"
 	$UiForm.Title = "$($SelectedConfig.CompanyName) HelpDesk Toolbox"
 	$CompanyIcon = Get-Item -Path $SelectedConfig.IconPath
 	$UiIcon = $uiform.FindName("CompanyIcon") 
@@ -75,12 +81,15 @@ param (
 
 	#update Variables 
 	$variableScript = Get-Item -path $selectedConfig.VariableScript
+	Write-verbose -Message "HDToolbox running variable script: $($variableScript.FullName)"
 	$variablesGrid = $uiform.FindName("Variables") 
 	[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript.FullName
 	$variablesGrid.ItemsSource = $AvailableVariables
 
 	# Update Script Nodes
+	Write-verbose -Message "HDToolbox Removing old script Nodes"
 	Remove-HdtUiScriptsNode -Form ([Ref]$UiForm) #Remove old script nodes
+
 	$TemplateScriptExpander = $uiform.FindName("TemplateExpander")
 	$GridRows = $uiform.FindName("GridRows")
 	$xamlTemplate = [System.Windows.Markup.XamlWriter]::Save($TemplateScriptExpander)
@@ -88,6 +97,7 @@ param (
 	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("VariableGridRow")) 
 	$index++ 
 	Foreach ($node in $SelectedConfig.Nodes){
+		Write-verbose -Message "HDToolbox Adding script Node: $($node.Name)"
 		$scripts = Get-ChildItem -path $node.Scripts -Recurse -filter *.ps1
 		If ($scripts.count -lt 1){
 			Write-Warning -Message "Node ($($node.name)):No Scripts found in $($node.Scripts)"
@@ -108,6 +118,8 @@ param (
 				if ($variablesGrid.items.VariableName -contains $param){
 					Continue parameter
 				}
+				Write-verbose -Message "HDToolbox New Missing Parameter: $param"
+
 				$variablesGrid.itemsSource += ([PSCustomObject]@{
 					VariableName = $param
 					Value = ''
@@ -119,19 +131,23 @@ param (
 	}
 
 	#logs
+	Write-verbose -Message "HDToolbox adding Logs"
 	$LogsExpanderGrid = $uiform.FindName("LogsExpander")
 	$GridRows = $uiform.FindName("GridRows")
 	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("LogGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($LogsExpanderGrid,$index)
-	Update-HdhLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig
+	Update-HdtLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig
 
 	#Update on timer
 	if (-not ($Update.IsPresent)){
+		Write-verbose -Message "HDToolbox Setting Refresh timer for logs"
 		$Timer = New-Object System.Windows.Forms.Timer
 		$Timer.Interval = 1000  # Timer interval in milliseconds (1000 ms = 1 second)
+		$timer.tag = @{'form' = $form}
 		$Timer.Add_Tick({
+			param($sender, $e)
 			# Update the label text with the current time
-			Update-HdtLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig -Update
+			Update-HdtLogs -form $sender.Tag['form'] -SelectedConfig $SelectedConfig -Update
 		})
 		$Timer.Start()
 	}
@@ -140,5 +156,5 @@ param (
 	$GatherLogsButton = $uiform.FindName("GatherLogs")
 	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("ButtonGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($GatherLogsButton,$index)
-
+	pop-location
 }
