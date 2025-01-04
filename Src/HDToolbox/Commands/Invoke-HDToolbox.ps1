@@ -66,7 +66,7 @@ param (
         Throw "No Config Found"
     }
     If (![String]::IsNullOrWhiteSpace($InitialConfig)){
-        $selectedConfig = $Configs.Where({$psitem.name -eq $config})
+        $selectedConfig = $Configs.Where({$psitem.name -eq $InitialConfig})
         if ($selectedConfig.count -eq 0) {
             Throw "Selected $Config not found in $($scriptRoot)"
         }

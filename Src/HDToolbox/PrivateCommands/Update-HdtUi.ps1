@@ -144,7 +144,7 @@ param (
 		$Timer = New-Object System.Windows.Forms.Timer
 		$Timer.Interval = 1000  # Timer interval in milliseconds (1000 ms = 1 second)
 		$timer.tag = @{'form' = $form}
-		$Timer.Add_Tick({
+		$Null = $Timer.Add_Tick({
 			param($sender, $e)
 			# Update the label text with the current time
 			Update-HdtLogs -form $sender.Tag['form'] -SelectedConfig $SelectedConfig -Update

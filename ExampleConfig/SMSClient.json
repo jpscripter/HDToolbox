@@ -20,9 +20,9 @@
         }
     ],
     "LogFiles" : [
-        "C:\\Windows\\Logs\\DISM\\"
+        "C:\\Windows\\Logs\\StorGroupPolicy.log"
     ],
-    "LogLookback" : "12",
+    "LogMaxAge" : "132",
     "EventLogs" : [
         "Application"
     ]

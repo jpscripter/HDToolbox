@@ -39,6 +39,7 @@ param (
 	$update
 )
 	$uiForm = $form.Value
+	Write-Debug -Message "HDToolbox logs Update:$($update.ispresent)"
 
 	#logs
 	$LogsGrid = $uiform.FindName("Logs")
@@ -50,43 +51,36 @@ param (
 
 	#get list of logs in variables
 	try{
-		$LogLookback = [int]$SelectedConfig.LogLookback
+		$LogMaxAge = [int]$SelectedConfig.LogMaxAge
 	}catch{
-		Write-warning -message "Can not convert LogLookback $($SelectedConfig.LogLookback) to int"
-		$LogLookback = 24
+		Write-warning -message "Cannot convert LogMaxAge $($SelectedConfig.LogMaxAge) to int"
+		$LogMaxAge = 24
 	}
 	[PSCustomobject[]]$VariableLogs = $uiform.FindName("Variables").ItemsSource.Where({$psitem.VariableName -Like "Log*"}).Value
 	:LogFiles foreach($log in ($VariableLogs + $SelectedConfig.LogFiles)){
-		if (-not (Test-Path -Path $log))
+		if ((($null -eq $Log) -or -not (Test-Path -Path $log)))
 		{
 			Write-Debug -Message "Config Log [$($log)] not found"
 			Continue LogFiles
 		}
 
 		#skip If too old
-		$logItem = Get-Item -Path $log
-		if ($logItem.Attributes -contains "Directory"){
+		$logItem = Get-Item -Path $log 
+		if ($logItem.Attributes -band [System.IO.FileAttributes]::Directory){
 			[io.Fileinfo[]]$logChildItems = Get-ChildItem -Path $logItem.FullName -Filter *.log -Recurse -File
-			$logChildItems = $logChildItems.Where({(get-date) -lt ($PSItem.LastWriteTime.AddHours($LogLookback))})
-			$logfiles.AddRange($logChildItems)
-		}else{
-			If ((get-date) -lt ($logItem.LastWriteTime.AddHours($LogLookback))){
-				Write-Debug -Message "Config Log [$($log)] too old"
-				Continue LogFiles
+			$logChildItems = $logChildItems.Where({(get-date) -lt ($PSItem.LastWriteTime.AddHours($LogMaxAge))})
+			if($logChildItems.count -gt 0){
+				$null = $logfiles.AddRange($logChildItems)
 			}
-	
-			$logFiles.Add($logItem.FullPath)
+		}else{
+			If ((get-date) -lt ($logItem.LastWriteTime.AddHours($LogMaxAge))){
+				$Null = $logFiles.Add($logItem.FullName)
+			}
 		}
 	}
 
 		
 	#get Entries from logs
-	try{
-		$LogLookback = [int]$SelectedConfig.LogLookback
-	}catch{
-		Write-warning -message "Can not convert LogLookback $($SelectedConfig.LogLookback) to int"
-		$LogLookback = -24
-	}
 	try{
 		$LogTailLength = [int]$SelectedConfig.LogTailLength
 	}catch{
@@ -108,7 +102,7 @@ param (
 		}
 		[pscustomObject[]]$entries = Get-Log -File $Log @params
 		if (-not ($update.IsPresent)){
-			$entries = $entries.Where({(get-date) -lt ($PSItem.DateTime.AddHours($LogLookback))})
+			$entries = $entries.Where({(get-date) -lt ($PSItem.DateTime.AddHours($LogMaxAge))})
 		}
 		if ($entries.count -gt 0){
 			try{
