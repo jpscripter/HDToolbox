@@ -44,31 +44,30 @@ param (
 
 	[Switch] $Update
 )
-	$uiForm = $form.Value
 	push-location -Path $SelectedConfig.ConfigDirectory
 	
 	#Update Dimentions
 	if ($Null -ne $SelectedConfig.Height){
-		$uiform.Height = $SelectedConfig.Height
+		$form.Value.Height = $SelectedConfig.Height
 	}
 	if ($Null -ne $SelectedConfig.Width){
-		$uiform.Width = $SelectedConfig.Width
+		$form.Value.Width = $SelectedConfig.Width
 	}
 	
 	#Update branding
 	Write-verbose -Message "HDToolbox Customizing UI for $($selectedConfig.CompanyName)"
-	$UiForm.Title = "$($SelectedConfig.CompanyName) HelpDesk Toolbox"
+	$form.Value.Title = "$($SelectedConfig.CompanyName) HelpDesk Toolbox"
 	$CompanyIcon = Get-Item -Path $SelectedConfig.IconPath
-	$UiIcon = $uiform.FindName("CompanyIcon") 
+	$UiIcon = $form.Value.FindName("CompanyIcon") 
 	$UiIcon.Source = $CompanyIcon.FullName
-	$uiform.Icon = $CompanyIcon.FullName
-	$UiCompanyName = $uiform.FindName("CompanyName") 
+	$form.Value.Icon = $CompanyIcon.FullName
+	$UiCompanyName = $form.Value.FindName("CompanyName") 
 	$UiCompanyName.Text = $SelectedConfig.CompanyName
-	$UiCompanyName = $uiform.FindName("Banner") 
+	$UiCompanyName = $form.Value.FindName("Banner") 
 	$UiCompanyName.Background = $SelectedConfig.BannerColor
 
 	#Update Configuration 
-	$UiConfigSelector = $UiForm.FindName('ConfigSelector')
+	$UiConfigSelector = $form.Value.FindName('ConfigSelector')
 	$UiConfigSelector.ItemsSource = [String[]]$configs.name
 	If(-not ($Update.IsPresent)){
 		$UiConfigSelector.SelectedIndex = $Configs.Name.IndexOf($selectedConfig.name)
@@ -82,19 +81,19 @@ param (
 	#update Variables 
 	$variableScript = Get-Item -path $selectedConfig.VariableScript
 	Write-verbose -Message "HDToolbox running variable script: $($variableScript.FullName)"
-	$variablesGrid = $uiform.FindName("Variables") 
+	$variablesGrid = $form.Value.FindName("Variables") 
 	[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript.FullName
 	$variablesGrid.ItemsSource = $AvailableVariables
 
 	# Update Script Nodes
 	Write-verbose -Message "HDToolbox Removing old script Nodes"
-	Remove-HdtUiScriptsNode -Form ([Ref]$UiForm) #Remove old script nodes
+	Remove-HdtUiScriptsNode -Form ([Ref]$form.Value) #Remove old script nodes
 
-	$TemplateScriptExpander = $uiform.FindName("TemplateExpander")
-	$GridRows = $uiform.FindName("GridRows")
+	$TemplateScriptExpander = $form.Value.FindName("TemplateExpander")
+	$GridRows = $form.Value.FindName("GridRows")
 	$xamlTemplate = [System.Windows.Markup.XamlWriter]::Save($TemplateScriptExpander)
 	$parent = $TemplateScriptExpander.Parent
-	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("VariableGridRow")) 
+	$index = $GridRows.RowDefinitions.IndexOf($form.Value.FindName("VariableGridRow")) 
 	$index++ 
 	Foreach ($node in $SelectedConfig.Nodes){
 		Write-verbose -Message "HDToolbox Adding script Node: $($node.Name)"
@@ -112,7 +111,7 @@ param (
 		$Parent.Children.Insert($index, $NodeExpander)
 
 		#Add Variables
-		$variablesGrid = $uiform.FindName("Variables") 
+		$variablesGrid = $form.Value.FindName("Variables") 
 		:script foreach($script in $nodeExpander.Content.Items){
 			:parameter foreach ($param in $script.Parameters.Split(';')){
 				if ($variablesGrid.items.VariableName -contains $param){
@@ -132,11 +131,11 @@ param (
 
 	#logs
 	Write-verbose -Message "HDToolbox adding Logs"
-	$LogsExpanderGrid = $uiform.FindName("LogsExpander")
-	$GridRows = $uiform.FindName("GridRows")
-	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("LogGridRow")) 
+	$LogsExpanderGrid = $form.Value.FindName("LogsExpander")
+	$GridRows = $form.Value.FindName("GridRows")
+	$index = $GridRows.RowDefinitions.IndexOf($form.Value.FindName("LogGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($LogsExpanderGrid,$index)
-	Update-HdtLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig
+	Update-HdtLogs -form $form -SelectedConfig $SelectedConfig
 
 	#Update on timer
 	if (-not ($Update.IsPresent)){
@@ -144,6 +143,7 @@ param (
 		$Timer = New-Object System.Windows.Forms.Timer
 		$Timer.Interval = 1000  # Timer interval in milliseconds (1000 ms = 1 second)
 		$timer.tag = @{'form' = $form}
+
 		$Null = $Timer.Add_Tick({
 			param($sender, $e)
 			# Update the label text with the current time
@@ -151,40 +151,45 @@ param (
 		})
 		$timer.Add_Tick({
 			param($sender, $e)
+			$completedscripts = @{}
 			:RunspaceMonitoring foreach ($script in $Script:syncHash["ScriptResults"].Keys){
-				wait-debugger
 				$Details = $Script:syncHash["ScriptResults"][$script]
                 if ((-not $Details.resultasync.IsCompleted) ){
                     continue RunspaceMonitoring
                 }
 				$runspace = $details.Runspace
-				$Grid = $sender.Tag['form'].value.FindName($Details.Script.Grid)
-				
-                $Details.output = $details.runspace.EndInvoke($details.resultAsync) -join '\n '
+				$Parent = $sender.Tag['form'].value.FindName('TemplateExpander').Parent
+				$gridExpander = $parent.Children.where({$psitem.name -eq ($details.Script.Grid + 'ScriptExpander')})
+				$grid = $gridExpander.Content
                 $warnings = $runspace.Streams.Warning -join '\n '
                 $Errors = $runspace.Streams.Error -join '\n '
                 if ($Errors -or $runspace.HadErrors){
-                    $details.State = "Error"
+                    $details.State = [ScriptState]::Error
                     $Details.output += "$errors"
                 }elseif ($Warnings){
-                    $details.State = "Warning"
+					$Details.output = $details.runspace.EndInvoke($details.resultAsync) -join '\n '
+                    $details.State = [ScriptState]::Warning
                 }else{
-                    $details.state = 'Complete'
+					$Details.output = $details.runspace.EndInvoke($details.resultAsync) -join '\n '
+                    $details.state = [ScriptState]::Complete
                 }
 
 				$scriptName = $details.Script.Name
-				$grid.ItemsSource.Where({$PSItem -eq $scriptName}).Foreach({$PSItem.state = $details.State; $psitem.Output = $details.output})
-				$Script:syncHash["ScriptResults"].Remove($script)
-				
+				$grid.ItemsSource.Where({$PSItem.name -eq $scriptName}).Foreach({$PSItem.state = $details.State; $psitem.Output = $details.output})
+				$completedscripts.add($script,$details)
 				$Grid.Items.Refresh() 
 			}
+			foreach($RemoveScript in $completedscripts.keys){
+				$Script:syncHash["ScriptResults"].Remove($RemoveScript)
+			}
+
 		})
 		$Timer.Start()
 	}
 
 	#Buttons
-	$GatherLogsButton = $uiform.FindName("GatherLogs")
-	$index = $GridRows.RowDefinitions.IndexOf($uiform.FindName("ButtonGridRow")) 
+	$GatherLogsButton = $form.Value.FindName("GatherLogs")
+	$index = $GridRows.RowDefinitions.IndexOf($form.Value.FindName("ButtonGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($GatherLogsButton,$index)
 	pop-location
 }
