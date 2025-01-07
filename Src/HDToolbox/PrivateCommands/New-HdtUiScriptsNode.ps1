@@ -27,7 +27,15 @@ function New-HdtUiScriptsNode {
         [PSCustomObject]$Node,
 
         [Parameter(Mandatory = $true)]
-        [string]$XamlString
+        [string]$XamlString,
+
+        [HashTable]$Columns = [Ordered]@{
+            'Folder'= $Null
+            'Name'= $Null
+            'Output'= 300
+            'Synopsis'= $Null
+            'Parameters'= $Null
+        }
     )
 
     # Retrieve scripts from the specified path
@@ -38,17 +46,18 @@ function New-HdtUiScriptsNode {
     }
 
     # Collect script metadata
-    $scriptObjects = New-Object -TypeName Collections.ArrayList
+    $scriptObjects = New-Object -TypeName Collections.ObjectModel.ObservableCollection[Object]
+    $scriptRef = New-Variable -Name ($Node.Name + "ScriptList") -Value $scriptObjects -Scope script -force -PassThru
     foreach ($script in $scripts) {
         $help = Get-Help $script.FullName -Detailed
-        $obj = [PSCustomObject]@{
+        $obj = [ScriptModel]@{
             Name       = $script.BaseName
-            FullPath   = $script.FullName
             Synopsis   = $help.SYNOPSIS
             Parameters = $help.Parameters.Parameter.Name -join ';'
             Folder     = $script.Directory.Name
-            Grid       = $Node.Name + "ScriptExpander"
-            Output     = ""
+            FullPath   = $script.FullName
+
+            Grid       = $Node.Name
         }
         $null = $scriptObjects.Add($obj)
     }
@@ -56,7 +65,6 @@ function New-HdtUiScriptsNode {
     # Deserialize the XAML template to create a new expander
     $reader = [System.Xml.XmlReader]::Create((New-Object System.IO.StringReader -ArgumentList $XamlString))
     $NodeExpander = [System.Windows.Markup.XamlReader]::Load($reader)
-
     # Update properties of the expander
     $NodeExpander.Name = $Node.Name + "ScriptExpander"
     $NodeExpander.Uid = $Node.Name + "ScriptExpander"
@@ -67,6 +75,7 @@ function New-HdtUiScriptsNode {
     $NodeGrid = $NodeExpander.FindName("Template")
     $NodeGrid.Name = $Node.Name 
 
+
     # UpdateContextMenu Name
     $TemplateExecute = $NodeExpander.FindName("TemplateExecute")
     $TemplateExecute.Name = $Node.Name + "Execute"
@@ -75,14 +84,27 @@ function New-HdtUiScriptsNode {
         $contextMenu = $menuItem.Parent
         $dataGrid = $contextMenu.PlacementTarget
         $SelectedScripts = $dataGrid.SelectedItems 
+        $scriptRefsAll = Get-Variable -Name ($dataGrid.name + "ScriptList") -Scope script 
+        $scriptRefsAll.value.Where({$PSItem -in $SelectedScripts}).Foreach({$PSItem.state = "Running"; $psitem.Output = ""})
+        $dataGrid.Items.Refresh() 
         $variablesGrid = $uiform.FindName("Variables") 
-        Invoke-HdhScript -SelectedScripts $SelectedScripts -AvailableParameters $variablesGrid.Items
+        Invoke-HdtScript -SelectedScripts $SelectedScripts -AvailableParameters $variablesGrid.Items
+        $dataGrid.UnselectAll()  
     })
 
     if (-not $NodeGrid) {
         Throw "Template grid not found in the expander."
     }
-    $NodeGrid.ItemsSource = $scriptObjects
 
+    $NodeGrid.ItemsSource = $scriptRef.value
+
+    # add columns
+    foreach ($column in $Columns.keys){
+        $newColumn = new-Object -type System.Windows.Controls.DataGridTextColumn
+        $newColumn.Header = $column
+        $newColumn.Binding = [System.Windows.Data.Binding]::new($column)
+        
+        $NodeGrid.columns.add($newColumn)
+    }
     return $NodeExpander
 }

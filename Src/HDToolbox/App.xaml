@@ -31,7 +31,7 @@
 
             <!-- Variables Expander -->
             <Expander Name="VariablesExpander" HorizontalAlignment="Stretch" Header="Variables" VerticalAlignment="Stretch" Margin="5" FontFamily="Arial" FontSize="18" IsExpanded="True" Background="LightGray" Grid.Row="0">
-                <DataGrid Name="Variables" IsReadOnly="False" FontSize="12">
+                <DataGrid Name="Variables" IsReadOnly="False" FontSize="12" AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="VariableName" Binding="{Binding VariableName}" Width="220" FontFamily="Verdana" FontSize="12"/>
                         <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="350" FontFamily="Verdana" FontSize="12"/>
@@ -49,7 +49,16 @@
             
             <!-- Logs Expander -->
             <Expander Name="LogsExpander" Header="Logs" Margin="5" FontFamily="Arial" FontSize="18" IsExpanded="True" Background="LightGray" Grid.Row="1">
-                <DataGrid Name="Logs" IsReadOnly="True" SelectionMode="Single" FontSize="12">
+                <DataGrid Name="Logs" IsReadOnly="True" SelectionMode="Single" FontSize="12" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="DateTime" Binding="{Binding Datetime}" Width="200" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="300" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="severity" Binding="{Binding severity}" Width="100" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="100" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Component" Binding="{Binding Component}" Width="100" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Details" Binding="{Binding details}" Width="200" FontFamily="Verdana" FontSize="12"/>
+                        <DataGridTextColumn Header="Thread" Binding="{Binding thread}" Width="50" FontFamily="Verdana" FontSize="12"/>
+                    </DataGrid.Columns>
                    <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
                             <Style.Triggers>
@@ -71,18 +80,28 @@
             
             <!-- Template Expander -->
             <Expander Name="TemplateExpander" Header="Template"  Margin="5" IsExpanded="True" FontFamily="Arial" FontSize="18" Visibility="Hidden" Background="LightGray">
-                <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Extended" FontSize="12">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" Binding="{Binding ScriptName}" Width="200" FontFamily="Verdana" FontSize="12"/>
-                        <DataGridTextColumn Header="Parameters" Binding="{Binding Parameters}" Width="200" FontFamily="Verdana" FontSize="12"/>
-                        <DataGridTextColumn Header="Folder" Binding="{Binding Folder}" Width="100" FontFamily="Verdana" FontSize="12"/>
-                        <DataGridTextColumn Header="Output" Binding="{Binding Output}" Width="300" FontFamily="Verdana" FontSize="12"/>
-                    </DataGrid.Columns>
+                <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Extended" FontSize="12" AutoGenerateColumns="false">
                     <DataGrid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Name="TemplateExecute" Header="Execute"/>
                         </ContextMenu>
                     </DataGrid.ContextMenu>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <!-- Change row background color if Status is 'Error' -->
+                                <DataTrigger Binding="{Binding State}" Value="Error">
+                                    <Setter Property="Background" Value="Red" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding State}" Value="Warning">
+                                    <Setter Property="Background" Value="Yellow" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding State}" Value="Running">
+                                    <Setter Property="Background" Value="LightBlue" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>  
                 </DataGrid>
             </Expander>
         </Grid>

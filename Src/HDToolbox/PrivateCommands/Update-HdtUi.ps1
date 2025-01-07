@@ -149,6 +149,36 @@ param (
 			# Update the label text with the current time
 			Update-HdtLogs -form $sender.Tag['form'] -SelectedConfig $SelectedConfig -Update
 		})
+		$timer.Add_Tick({
+			param($sender, $e)
+			:RunspaceMonitoring foreach ($script in $Script:syncHash["ScriptResults"].Keys){
+				wait-debugger
+				$Details = $Script:syncHash["ScriptResults"][$script]
+                if ((-not $Details.resultasync.IsCompleted) ){
+                    continue RunspaceMonitoring
+                }
+				$runspace = $details.Runspace
+				$Grid = $sender.Tag['form'].value.FindName($Details.Script.Grid)
+				
+                $Details.output = $details.runspace.EndInvoke($details.resultAsync) -join '\n '
+                $warnings = $runspace.Streams.Warning -join '\n '
+                $Errors = $runspace.Streams.Error -join '\n '
+                if ($Errors -or $runspace.HadErrors){
+                    $details.State = "Error"
+                    $Details.output += "$errors"
+                }elseif ($Warnings){
+                    $details.State = "Warning"
+                }else{
+                    $details.state = 'Complete'
+                }
+
+				$scriptName = $details.Script.Name
+				$grid.ItemsSource.Where({$PSItem -eq $scriptName}).Foreach({$PSItem.state = $details.State; $psitem.Output = $details.output})
+				$Script:syncHash["ScriptResults"].Remove($script)
+				
+				$Grid.Items.Refresh() 
+			}
+		})
 		$Timer.Start()
 	}
 

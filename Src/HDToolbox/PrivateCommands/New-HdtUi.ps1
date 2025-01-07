@@ -44,11 +44,5 @@ param (
 	$UiForm = [Windows.Markup.XamlReader]::Load( $reader )
 
 	#Add for Updating from Scripts
-	if ($Null -eq $script:syncHash["UiForm"]){
-        $script:syncHash.Add("UiForm",$UiForm)
-    }else{
-		$script:syncHash["UiForm"] = $UiForm
-	}
-
 	return $UiForm
 }

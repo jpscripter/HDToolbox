@@ -56,15 +56,21 @@ function Invoke-HdtScript {
         }
 
         #run
-        $AddedCommand.BeginInvoke()
         Write-Debug "'$($Script.FullPath)' Executed"
-
+        $result = $AddedCommand.BeginInvoke()
         #add to Hashset
         try{
-            $script:syncHash["RunningScripts"].Add($runspace.InstanceId.guid,$script)
+            $Details= [PSCustomObject]@{
+                Script = $script
+                runspace = $runspace
+                resultAsync = $result
+                State = [ScriptState]::Running
+                Output = ""
+            }
+            $script:syncHash["ScriptResults"].Add($runspace.InstanceId.guid, $Details)
         }
         catch{
-            wait-debugger
+            #wait-debugger
             Write-Error $PSitem -ErrorAction continue
         }
     }

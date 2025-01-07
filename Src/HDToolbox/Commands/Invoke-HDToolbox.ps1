@@ -78,6 +78,7 @@ param (
     #region Config UI 
     Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs
     #endregion
-
+    
     $uiform.ShowDialog()
+    $script:syncHash['ContinueMonitoring'] = $false
 }

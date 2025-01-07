@@ -1,6 +1,22 @@
 add-type -AssemblyName PresentationFramework
 add-type -AssemblyName PresentationCore
 Add-Type -AssemblyName System.Windows.Forms
+enum ScriptState {
+    Complete = 0
+    Running = 1
+    Warning = 2
+    Error = 3
+}
+class ScriptModel {
+    [string]$Folder
+    [string]$Name
+    [string]$Output = ""
+    [string]$Synopsis
+    [string]$Parameters
+    [string]$Grid
+    [Nullable[ScriptState]]$State 
+    [string]$FullPath
+}
 
 if (Test-Path -Path $PSScriptRoot\PrivateCommands\){
     $Commands = Get-ChildItem -Path $PSScriptRoot\PrivateCommands\*.ps1 -file -Recurse
@@ -20,17 +36,6 @@ if (Test-Path -Path $PSScriptRoot\Commands\){
     Export-ModuleMember -Function $Commands.BaseName 
 }
 
-#region Runspace Setup
-$monitorScript = {
-    param($syncHash)
-
-    while (-not $syncHash.StopMonitor) {
-        # Simulate monitoring activity
-        $syncHash.MonitorLog += "Monitor tick at $(Get-Date -Format 'HH:mm:ss')"
-        Start-Sleep -Seconds 1
-    }
-    $syncHash.MonitorLog += "Monitoring stopped at $(Get-Date -Format 'HH:mm:ss')"
-}
 
 # Create a runspace pool and a runspace
     $Min = 1
@@ -39,26 +44,8 @@ $monitorScript = {
     $Script:runspacePool.Open()
 
     $Script:syncHash = [hashtable]::Synchronized(@{
-        RunningScripts = @{}
+        ScriptResults = @{}
+        ContinueMonitoring = $true
     })
 
-    $monitorScript = {
-        param($syncHash)
-        Write-Verbose -Message "HelpDeskHelper Script Monitor"
-
-        while (-not $syncHash.StopMonitor) {
-            # Simulate monitoring activity
-            $syncHash.MonitorLog += "Monitor tick at $(Get-Date -Format 'HH:mm:ss')"
-            Start-Sleep -Seconds 1
-        }
-        $syncHash.MonitorLog += "Monitoring stopped at $(Get-Date -Format 'HH:mm:ss')"
-    }
-
-    # Set up the monitoring runspace
-    $monitorRunspace = [powershell]::Create().AddScript($monitorScript).AddArgument($Script:syncHash)
-    $monitorRunspace.RunspacePool = $Script:runspacePool
-
-
-    # Start the monitoring runspace
-    $monitorRunspace.BeginInvoke()
 #endregion
