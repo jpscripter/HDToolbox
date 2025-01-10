@@ -7,9 +7,6 @@
     (HKLM) and user-specific (HKEY_USERS) registry locations. The results are 
     written to a text file, and the file path is returned.
 
-.PARAMETER IncludeSystemComponents
-    Includes system components in the output. By default, system components are excluded.
-
 .OUTPUTS
     A string containing the path to the output file with installed program details.
 
@@ -18,7 +15,7 @@
     Retrieves installed programs (excluding system components) and writes them to a file.
 
 .EXAMPLE
-    PS> Get-InstalledPrograms -IncludeSystemComponents
+    PS> Get-InstalledPrograms 
     Retrieves all installed programs, including system components, and writes them to a file.
 
 .NOTES
@@ -28,60 +25,54 @@
     https://docs.microsoft.com/en-us/windows/win32/msi/standard-registry-keys
 #>
 
-function Get-InstalledPrograms {
-    [CmdletBinding()]
-    param (
-        [switch]$IncludeSystemComponents
+
+[CmdletBinding()]
+param (
+)
+
+# Registry paths for Add/Remove Programs
+$registryPaths = @(
+    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+)
+
+# Add HKEY_USERS paths
+$userSIDs = Get-ChildItem -Path "HKU:\" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -notlike "*Classes" }
+foreach ($userSID in $userSIDs) {
+    $registryPaths += @(
+        "HKU:\$($userSID.PSChildName)\Software\Microsoft\Windows\CurrentVersion\Uninstall"
     )
+}
 
-    # Registry paths for Add/Remove Programs
-    $registryPaths = @(
-        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
-    )
+# Initialize an array for storing program data
+$programs = @()
 
-    # Add HKEY_USERS paths
-    $userSIDs = Get-ChildItem -Path "HKU:\" -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -notlike "*Classes" }
-    foreach ($userSID in $userSIDs) {
-        $registryPaths += @(
-            "HKU:\$($userSID.PSChildName)\Software\Microsoft\Windows\CurrentVersion\Uninstall"
-        )
-    }
+foreach ($path in $registryPaths) {
+    if (Test-Path $path) {
+        $subKeys = Get-ChildItem -Path $path -ErrorAction SilentlyContinue
 
-    # Initialize an array for storing program data
-    $programs = @()
+        foreach ($subKey in $subKeys) {
+            $program = Get-ItemProperty -Path $subKey.PSPath -ErrorAction SilentlyContinue
 
-    foreach ($path in $registryPaths) {
-        if (Test-Path $path) {
-            $subKeys = Get-ChildItem -Path $path -ErrorAction SilentlyContinue
-
-            foreach ($subKey in $subKeys) {
-                $program = Get-ItemProperty -Path $subKey.PSPath -ErrorAction SilentlyContinue
-
-                if ($program.DisplayName -and ($IncludeSystemComponents -or -not ($program.SystemComponent))) {
-                    $programs += [pscustomobject]@{
-                        Name         = $program.DisplayName
-                        Version      = $program.DisplayVersion
-                        Publisher    = $program.Publisher
-                        InstallDate  = $program.InstallDate
-                        UninstallCmd = $program.UninstallString
-                        RegistryPath = $subKey.PSPath
-                    }
-                }
+            $programs += [pscustomobject]@{
+                Name         = $program.DisplayName
+                Version      = $program.DisplayVersion
+                Publisher    = $program.Publisher
+                InstallDate  = $program.InstallDate
+                UninstallCmd = $program.UninstallString
+                RegistryPath = $subKey.PSPath
+                SystemComponent = $program.SystemComponent
             }
         }
     }
-
-    # Define output file path
-    $outputFile = Join-Path -Path $env:Temp -ChildPath "InstalledPrograms_$(Get-Date -Format 'yyyyMMddHHmmss').txt"
-
-    # Write program list to the file
-    $programs | Format-Table -AutoSize | Out-File -FilePath $outputFile -Encoding utf8
-
-    # Return the file path
-    return $outputFile
 }
 
-# Call the function and write the result
-$fileName = Get-InstalledPrograms
-Write-Output "Installed programs written to: $fileName"
+# Define output file path
+$filename = "InstalledPrograms_$env:Computername-$env:USERDOMAIN-$(Get-Date -Format 'yyyyMMddHHmmss').txt"
+$outputFile = Join-Path -Path $env:Temp -ChildPath $filename
+
+# Write program list to the file
+$programs |ConvertTo-Csv | Out-File -FilePath $outputFile -Encoding utf8
+
+# Return the file path
+return $outputFile
