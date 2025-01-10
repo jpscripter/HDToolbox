@@ -22,7 +22,7 @@ Runs the specified scripts and returns the combined results as an array of objec
 Ensure all script files exist and have the necessary permissions before invoking this cmdlet.
 #>
 
-function Invoke-HdtGatherScripts {
+function Invoke-HdtGatherScript {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]

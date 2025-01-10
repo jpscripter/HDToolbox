@@ -79,10 +79,10 @@ param (
 	}
 
 	#update Variables 
-	$variableScript = Get-Item -path $selectedConfig.VariableScript
+	$variableScript = Get-ChildItem -path $selectedConfig.VariableScript
 	Write-verbose -Message "HDToolbox running variable script: $($variableScript.FullName)"
 	$variablesGrid = $form.Value.FindName("Variables") 
-	[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript.FullName
+	[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript
 	$variablesGrid.ItemsSource = $AvailableVariables
 
 	# Update Script Nodes
@@ -191,5 +191,30 @@ param (
 	$GatherLogsButton = $form.Value.FindName("GatherLogs")
 	$index = $GridRows.RowDefinitions.IndexOf($form.Value.FindName("ButtonGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($GatherLogsButton,$index)
+	$GatherLogsButton.Add_Click({
+		push-location -Path $SelectedConfig.ConfigDirectory
+		#save location
+		$saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+		$saveFileDialog.Filter = "ZIP Files (*.zip)|*.zip"
+		$saveFileDialog.Title = "Select a location to save the ZIP file"
+		$filename = "GatheredFiles_$env:Computername-$($selectedConfig.Name)-$(Get-Date -Format 'yyyyMMddHHmmss').txt"
+		$saveFileDialog.FileName = $filename  # Default filename
+		if ($saveFileDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+			$zipFilePath = $saveFileDialog.FileName
+			
+			#run scripts
+			$GatherScripts = Get-ChildItem -path $selectedConfig.LogGatherScript
+			Write-verbose -Message "HDToolbox running Gather scripts: $($GatherScripts.FullName)"
+			$FilesToGather = Invoke-HdtGatherScript -ScriptPath $GatherScripts
+
+			#ZipFiles
+			Start-HdtGather -FilesToGather $FilesToGather -ZipFilePath $zipFilePath
+
+		} else {
+			Write-Warning "No location selected."
+		}
+		#run scripts
+		Pop-Location
+	})
 	pop-location
 }

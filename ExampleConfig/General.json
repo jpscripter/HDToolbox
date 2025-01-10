@@ -11,7 +11,7 @@
 
     "Name": "WorkStation",
     "VariableScript" : ".\\VariableScripts\\Workstation.ps1",
-    "LogGatherScript" : ".\\Gather\\*",
+    "LogGatherScript" : ".\\Gather\\",
     "Nodes": [
         {
             "Name" : "Tests",
