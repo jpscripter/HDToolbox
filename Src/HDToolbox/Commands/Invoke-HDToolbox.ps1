@@ -42,7 +42,8 @@ param (
     [io.directoryInfo]$ConfigSourceDirectory
     if ($ConfigSource.StartsWith('HTTP')){
         Write-Debug -Message "HDToolbox found a remote config. Downloading..."
-        $ConfigSourceDirectory = $null
+        $scriptSource = Get-HdtGitSource -SourceURL $ConfigSource
+        $ConfigSourceDirectory = get-Item -path $scriptSource 
     }else{
         $ConfigSourceDirectory = get-Item -path $ConfigSource 
     }
@@ -78,7 +79,11 @@ param (
     #region Config UI 
     Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs
     #endregion
-    
+    $script:syncHash['ContinueMonitoring'] = $True
     $uiform.ShowDialog()
     $script:syncHash['ContinueMonitoring'] = $false
+
+    if (-not [String]::IsNullOrDefault( $scriptSource )){
+        Remove-Item -Path  $scriptSource  -Recurse -force
+    }
 }

@@ -31,7 +31,7 @@ Function Get-HdtConfigs {
 	$Configs = New-Object Collections.Arraylist
 
 	#If no config is passed in
-	$configFiles = Get-ChildItem -Path "$($Source.FullName)\*" -Filter *.json
+	$configFiles = Get-ChildItem -Path "$($Source.FullName)\*" -Filter *.json -Recurse
 	Foreach ($configFile in $configFiles){
 		$configContent = Get-Content -Raw $configFile
 		Write-Debug -Message "Reading $($ConfigFile.FullName)"
@@ -45,5 +45,12 @@ Function Get-HdtConfigs {
 			Write-Warning -Message "Failed to convert $($configFile.FullName)"
 		}
 	}
+
+	$script:ConfigSettings = @{}
+
+	Foreach($config in $Configs){
+		$script:ConfigSettings
+	}
+
 	return $Configs
 }
