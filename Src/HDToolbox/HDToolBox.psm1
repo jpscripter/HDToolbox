@@ -38,14 +38,14 @@ if (Test-Path -Path $PSScriptRoot\Commands\){
 
 
 # Create a runspace pool and a runspace
-    $Min = 1
-    $max = 10
-    $Script:runspacePool = [runspacefactory]::CreateRunspacePool($min, $Max)
-    $Script:runspacePool.Open()
+$Min = 1
+$max = 10
+$Script:runspacePool = [runspacefactory]::CreateRunspacePool($min, $Max)
+$Script:runspacePool.Open()
 
-    $Script:syncHash = [hashtable]::Synchronized(@{
-        ScriptResults = @{}
-        ContinueMonitoring = $true
-    })
-    
+$Script:syncHash = [hashtable]::Synchronized(@{
+    ScriptResults = @{}
+    ContinueMonitoring = $true
+})
+
 #endregion
