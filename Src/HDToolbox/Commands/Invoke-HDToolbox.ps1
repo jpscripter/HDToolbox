@@ -40,7 +40,7 @@ param (
     #region setup Config
     Write-Debug -Message "HDToolbox is using $ConfigSource"
     [io.directoryInfo]$ConfigSourceDirectory
-    if ($ConfigSource.StartsWith('HTTP')){
+    if ($ConfigSource.ToLower().StartsWith('http')){
         Write-Debug -Message "HDToolbox found a remote config. Downloading..."
         $scriptSource = Get-HdtGitSource -SourceURL $ConfigSource
         $ConfigSourceDirectory = get-Item -path $scriptSource 
@@ -84,6 +84,7 @@ param (
     $script:syncHash['ContinueMonitoring'] = $false
 
     if (-not [String]::IsNullOrEmpty( $scriptSource )){
-        Remove-Item -Path  $scriptSource  -Recurse -force
+        $uiform = $null
+        Remove-Item -Path  $scriptSource  -Recurse -force -ErrorAction SilentlyContinue
     }
 }
