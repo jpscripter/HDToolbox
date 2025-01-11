@@ -38,8 +38,10 @@ Function Get-HdtConfigs {
 		Try{
 			$configObject = ConvertFrom-Json -InputObject $configContent
 			$null = Add-Member -inputObject $configObject -name ConfigDirectory -value $configFile.Directory -Type NoteProperty
-			$null = $configs.Add($configObject)
-			Write-Debug -Message "`t Adding $($configObject.Name)"
+			if ( -not [string]::IsNullOrWhiteSpace($configObject.VariableScript)){
+				$null = $configs.Add($configObject)
+				Write-Debug -Message "`t Adding $($configObject.Name)"
+			}
 		}
 		catch {
 			Write-Warning -Message "Failed to convert $($configFile.FullName)"
@@ -49,7 +51,12 @@ Function Get-HdtConfigs {
 	$script:ConfigSettings = @{}
 
 	Foreach($config in $Configs){
-		$script:ConfigSettings
+		$configSettingsTempObj = [PSCustomObject]@{
+			Variables = New-Object -type Collections.ObjectModel.ObservableCollection[Object]
+			Logs = New-Object -type Collections.ObjectModel.ObservableCollection[Object]
+			Scripts = @{}
+		}
+		$script:ConfigSettings.Add($Config.Name, $configSettingsTempObj)
 	}
 
 	return $Configs

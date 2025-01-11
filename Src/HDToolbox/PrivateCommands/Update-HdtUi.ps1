@@ -79,11 +79,16 @@ param (
 	}
 
 	#update Variables 
-	$variableScript = Get-ChildItem -path $selectedConfig.VariableScript
-	Write-verbose -Message "HDToolbox running variable script: $($variableScript.FullName)"
 	$variablesGrid = $form.Value.FindName("Variables") 
-	[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript
-	$variablesGrid.ItemsSource = $AvailableVariables
+	if ($script:ConfigSettings[$selectedConfig.name].Variables.Count -lt 1){
+		$variableScript = Get-ChildItem -path $selectedConfig.VariableScript
+		Write-verbose -Message "HDToolbox running variable script: $($variableScript.FullName)"
+		[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript
+		Foreach($AvailableVariable in $AvailableVariables){
+			$null = $script:ConfigSettings[$selectedConfig.name].Variables.Add($AvailableVariable)
+		}
+	}
+	$variablesGrid.ItemsSource = $script:ConfigSettings[$selectedConfig.name].Variables
 
 	# Update Script Nodes
 	Write-verbose -Message "HDToolbox Removing old script Nodes"
@@ -114,16 +119,16 @@ param (
 		$variablesGrid = $form.Value.FindName("Variables") 
 		:script foreach($script in $nodeExpander.Content.Items){
 			:parameter foreach ($param in $script.Parameters.Split(';')){
-				if ($variablesGrid.items.VariableName -contains $param){
+				if ($variablesGrid.items.VariableName -contains $param -or [string]::IsNullOrWhiteSpace($param)){
 					Continue parameter
 				}
 				Write-verbose -Message "HDToolbox New Missing Parameter: $param"
-
-				$variablesGrid.itemsSource += ([PSCustomObject]@{
+				$AvailableVariableScript = ([PSCustomObject]@{
 					VariableName = $param
 					Value = ''
 					Source = $script.name
 				})
+				$null = $script:ConfigSettings[$selectedConfig.name].Variables.Add($AvailableVariableScript)
 			}
 		}
 		$index++ 

@@ -83,7 +83,7 @@ param (
     $uiform.ShowDialog()
     $script:syncHash['ContinueMonitoring'] = $false
 
-    if (-not [String]::IsNullOrDefault( $scriptSource )){
+    if (-not [String]::IsNullOrEmpty( $scriptSource )){
         Remove-Item -Path  $scriptSource  -Recurse -force
     }
 }
