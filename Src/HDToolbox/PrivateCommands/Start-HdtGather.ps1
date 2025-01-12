@@ -67,8 +67,10 @@ function Start-HdtGather {
 		$ForStateTempFileName = "HDToolboxState_$env:Computername-$($selectedConfig.Name)-$(Get-Date -Format 'yyyyMMddHHmmss').json"
 		$ForStateTempFile = "$env:temp\$ForStateTempFileName"
 		$logGrid = $HdtForm.Form.FindName("Logs")
-		$SelectedIndex = $logGrid.SelectedIndex
-		$ImportantLogEntries = $logGrid.ItemsSource[($SelectedIndex-5)..($SelectedIndex+5)]
+		$SelectedIndex = $logGrid.ItemsSource.CurrentPosition
+		$FilteredLogEntries = $logGrid.ItemsSource.Foreach({$PSItem})
+		$ImportantLogEntries = $FilteredLogEntries[($SelectedIndex-5)..($SelectedIndex+5)]
+
 		$ForStateTempObject = [PSCustomObject]@{
 			SelectedConfig = $HdtForm.selectedConfig
 			Variables = $CurrentConfig.Variables
