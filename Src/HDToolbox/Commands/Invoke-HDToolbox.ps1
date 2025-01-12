@@ -80,9 +80,9 @@ param (
 
     #Launch Dialog
     $script:syncHash['ContinueMonitoring'] = $True
-    $HdtForm.form.Activate()  # brings to front
-    $HdtForm.form.ShowDialog()
-    $HdtForm.form.Close()
+    $null = $HdtForm.form.Activate()  # brings to front
+    $null = $HdtForm.form.ShowDialog()
+    $null = $HdtForm.form.Close()
     $HdtForm = $null
     [GC]::collect()
     $script:syncHash['ContinueMonitoring'] = $false

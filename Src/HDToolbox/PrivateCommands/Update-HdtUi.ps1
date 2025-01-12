@@ -60,6 +60,10 @@ param (
 	[System.Windows.Controls.Grid]::SetRow($LogsExpanderGrid,$index)
 	Update-HdtLogs -HdtForm $HdtForm
 
+	#add Log filter Control + F.
+	Write-verbose -Message "HDToolbox adding  Control + f search"
+	New-HdtContolFSearch -HdtForm $HdtForm
+
 	#Update on timer
 	if (-not ($Update.IsPresent)){
 		Write-verbose -Message "HDToolbox Setting Refresh timer for logs"
