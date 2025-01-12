@@ -155,7 +155,7 @@ param (
 				Scripts = $CurrentConfig.scripts
 				ImportantLogEntries = $ImportantLogEntries
 			} 
-			$ForStateTempJson = ConvertTo-Json -Depth 4 -InputObject $ForStateTempObject 
+			$ForStateTempJson = ConvertTo-Json -Depth 3 -InputObject $ForStateTempObject 
 			out-file -FilePath $forStateTempFile -InputObject $ForStateTempJson
 			$FilesToGather.add($ForStateTempFile)
 
