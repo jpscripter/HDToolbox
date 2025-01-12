@@ -14,7 +14,7 @@ The base Window object to update
 The Selected Config Object
 
 .EXAMPLE
-Update-HdtLogs -form ([ref]$uiform) -SelectedConfig $SelectedConfig
+Update-HdtLogs HdtForm $HdtForm
 
 .NOTES
 Version: 1.0  
@@ -41,9 +41,9 @@ param (
 	#logs
 	$LogsGrid = $HdtForm.form.FindName("Logs")
 	if (-not $update.IsPresent){
-		$LogsGrid.ItemsSource = $HdtForm.Configs[$selectedConfig.Name].Logs
+		$LogsGrid.ItemsSource = $HdtForm.Configs[$selectedConfig.Name].LogsSource
 	}
-
+	
 	#get list of logs in variables
 	try{
 		$LogMaxAge = [int]$SelectedConfig.LogMaxAge
@@ -73,7 +73,6 @@ param (
 			}
 		}
 	}
-
 	#get Entries from logs
 	try{
 		$LogTailLength = [int]$SelectedConfig.LogTailLength

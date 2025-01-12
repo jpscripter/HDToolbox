@@ -39,7 +39,7 @@ Function Get-HdtConfigs {
 		Write-Debug -Message "Reading $($ConfigFile.FullName)"
 		Try{
 			$configObject = ConvertFrom-Json -InputObject $configContent
-			$null = Add-Member -inputObject $configObject -name ConfigDirectory -value $configFile.Directory -Type NoteProperty
+			$null = Add-Member -inputObject $configObject -name ConfigDirectory -value $configFile.Directory.Fullname -Type NoteProperty
 			if ( -not [string]::IsNullOrWhiteSpace($configObject.VariableScript)){
 				$null = $configs.Add($configObject)
 				Write-Debug -Message "`t Found $($configObject.Name)"
@@ -57,9 +57,7 @@ Function Get-HdtConfigs {
 		if ($null -eq $HdtForm.SelectedConfig){
 			$HdtForm.SelectedConfig = $Config
 		}
-		$configSettingsTempObj = [ConfigStatus] @{
-			ConfigDetails = $config
-		}
+		$configSettingsTempObj = [ConfigStatus]::new($config)
 		$HdtForm.Configs.Add($Config.Name, $configSettingsTempObj)
 	}
 }

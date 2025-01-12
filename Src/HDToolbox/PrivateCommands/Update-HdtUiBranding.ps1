@@ -39,6 +39,8 @@ param (
 	#Update Dimentions
 	if ($Null -ne $SelectedConfig.Height){
 		$HdtForm.form.Height = $SelectedConfig.Height
+	}else{
+		$HdtForm.form.WindowState = [System.Windows.WindowState]::Maximized
 	}
 	if ($Null -ne $SelectedConfig.Width){
 		$HdtForm.form.Width = $SelectedConfig.Width

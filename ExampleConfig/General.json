@@ -6,9 +6,6 @@
     "Description": "Troubleshooting tool to help the help desk",
     "IconPath": ".\\th.jpg",
 
-    "Height" : 800,
-    "width" : 800,
-
     "Name": "WorkStation",
     "VariableScript" : ".\\VariableScripts\\Workstation.ps1",
     "LogGatherScript" : ".\\Gather\\",
@@ -29,7 +26,7 @@
     "LogFiles" : [
         "C:\\Windows\\Logs\\DISM\\"
     ],
-    "LogMaxAge" : "5",
+    "LogMaxAge" : "15",
     "LogTailLength":"15000",
     "EventLogs" : [
         "Application"

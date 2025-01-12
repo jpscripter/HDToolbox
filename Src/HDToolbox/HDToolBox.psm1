@@ -1,6 +1,3 @@
-add-type -AssemblyName PresentationFramework
-add-type -AssemblyName PresentationCore
-Add-Type -AssemblyName System.Windows.Forms
 enum ScriptState {
     Complete = 0
     Running = 1
@@ -28,10 +25,22 @@ class HdtForm {
 
 class ConfigStatus {
     [Object] $ConfigDetails
-    [Collections.ObjectModel.ObservableCollection[Object]]$Variables = (New-Object -type Collections.ObjectModel.ObservableCollection[Object])
-    [Collections.ObjectModel.ObservableCollection[Object]]$Logs = (New-Object -type Collections.ObjectModel.ObservableCollection[Object])
-    [hashtable]$Scripts = @{}
-    [Collections.Generic.HashSet[String]]$logFiles = (new-object Collections.Generic.HashSet[String])
+    [Collections.ObjectModel.ObservableCollection[Object]]$Variables
+    [Collections.ObjectModel.ObservableCollection[Object]]$Logs
+    [System.Windows.Data.ListCollectionView]$LogsSource
+    [hashtable]$Scripts
+    [Collections.Generic.HashSet[String]]$logFiles
+
+    # Constructor
+    ConfigStatus($ConfigDetails) {
+        # Initialize properties with default values
+        $this.ConfigDetails = $ConfigDetails
+        $this.Variables = [Collections.ObjectModel.ObservableCollection[Object]]::new()
+        $this.Logs = [Collections.ObjectModel.ObservableCollection[Object]]::new()
+        $this.LogsSource = [System.Windows.Data.CollectionViewSource]::GetDefaultView($this.Logs)
+        $this.Scripts = @{}
+        $this.logFiles = [Collections.Generic.HashSet[String]]::new()
+    }
 }
 
 if (Test-Path -Path $PSScriptRoot\PrivateCommands\){

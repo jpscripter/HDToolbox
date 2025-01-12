@@ -80,6 +80,7 @@ param (
 
     #Launch Dialog
     $script:syncHash['ContinueMonitoring'] = $True
+    $HdtForm.form.Activate()  # brings to front
     $HdtForm.form.ShowDialog()
     $HdtForm.form.Close()
     $HdtForm = $null

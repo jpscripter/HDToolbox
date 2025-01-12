@@ -1,61 +1,90 @@
-<#
-.SYNOPSIS
-Gathers specified files into a temporary folder, creates a ZIP archive, and copies the archive to a specified location.
+    <#
+    .SYNOPSIS
+    Gathers specified files and creates a ZIP archive at the chosen location.
 
-.DESCRIPTION
-The Start-HdtGather cmdlet accepts a list of file paths to gather, copies them into a temporary folder, compresses them into a ZIP archive, and saves the archive to the specified destination. The temporary folder is cleaned up after the operation.
+    .DESCRIPTION
+    The `Start-HdtGather` cmdlet collects specified files, including scripts, logs, and configuration state, 
+    and creates a ZIP archive at a user-selected location. It ensures no duplicate files are added to the archive 
+    and removes any temporary files used during the process.
 
-.PARAMETER FilesToGather
-An array of file paths to include in the ZIP archive.
+    .PARAMETER FilesToGather
+    A collection of file paths to gather into the ZIP archive. Duplicate entries are automatically removed.
 
-.PARAMETER ZipFilePath
-The destination path where the ZIP archive will be saved.
+    .PARAMETER ZipFilePath
+    The full file path where the ZIP archive will be created.
 
-.EXAMPLE
-Start-HdtGather -FilesToGather @("C:\Path\To\File1.txt", "C:\Path\To\File2.txt") -ZipFilePath "C:\Path\To\Output.zip"
+    .EXAMPLE
+    Start-HdtGather -FilesToGather $files -ZipFilePath "C:\Logs\GatheredFiles.zip"
 
-Gathers the specified files into a ZIP archive and saves it to the given path.
+    This example gathers the files specified in `$files` and creates a ZIP archive at `C:\Logs\GatheredFiles.zip`.
 
-.NOTES
-Ensure the files exist and the destination path is accessible.
-#>
+    .NOTES
+    - This cmdlet requires the `System.IO.Compression.FileSystem` assembly for ZIP file creation.
+    - Temporary files created during the process are automatically removed after gathering.
 
+    .INPUTS
+    - [Collections.Generic.HashSet[String]]: A collection of unique file paths.
+    - [String]: A string representing the path for the ZIP archive.
+
+    .OUTPUTS
+    None. This cmdlet creates a ZIP archive as a side effect.
+
+    #>
 function Start-HdtGather {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [string[]]$FilesToGather,
+	[CmdletBinding()]
+	param (
+		[HdtForm]
+		$HdtForm
+	)
 
-        [Parameter(Mandatory = $true)]
-        [string]$ZipFilePath
-    )
+	$SelectedConfig = $HdtForm.selectedConfig
+	$CurrentConfig = $HdtForm.Configs[ $HdtForm.SelectedConfig.Name]
+	push-location -Path $SelectedConfig.ConfigDirectory
+	
+	#save location
+	$saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+	$saveFileDialog.Filter = "ZIP Files (*.zip)|*.zip"
+	$saveFileDialog.Title = "Select a location to save the ZIP file"
+	$filename = "GatheredFiles_$env:Computername-$($selectedConfig.Name)-$(Get-Date -Format 'yyyyMMddHHmmss').zip"
+	$saveFileDialog.FileName = $filename  # Default filename
+	if ($saveFileDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+		$zipFilePath = $saveFileDialog.FileName
 
-    # Create a temporary folder
-    $tempFolder = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), [System.Guid]::NewGuid().ToString())
-    New-Item -ItemType Directory -Path $tempFolder | Out-Null
+		#using hashset to dedup quickly
+		$FilesToGather = (new-object Collections.Generic.HashSet[String])
+		
+		#run scripts
+		$GatherScripts = Get-ChildItem -path $selectedConfig.LogGatherScript
+		Write-verbose -Message "HDToolbox running Gather scripts: $($GatherScripts.FullName)"
+		$FilesToGatherFromGather = Invoke-HdtGatherScript -ScriptPath $GatherScripts
+		$FilesToGatherFromGather.foreach({$null = $FilesToGather.add($Psitem)})
+		
+		#gather logs
+		$FilesToGatherFromLogs =  $CurrentConfig.Logfiles
+		$FilesToGatherFromLogs.foreach({$null = $FilesToGather.add($Psitem)})
 
-    try {
-        # Copy files to the temporary folder
-        foreach ($file in $FilesToGather) {
-            if (Test-Path $file) {
-                Copy-Item -Path $file -Destination $tempFolder
-            } else {
-                Write-Warning "File not found: $file"
-            }
-        }
+		#gather State
+		$ForStateTempFileName = "HDToolboxState_$env:Computername-$($selectedConfig.Name)-$(Get-Date -Format 'yyyyMMddHHmmss').json"
+		$ForStateTempFile = "$env:temp\$ForStateTempFileName"
+		$logGrid = $HdtForm.Form.FindName("Logs")
+		$SelectedIndex = $logGrid.SelectedIndex
+		$ImportantLogEntries = $logGrid.ItemsSource[($SelectedIndex-5)..($SelectedIndex+5)]
+		$ForStateTempObject = [PSCustomObject]@{
+			SelectedConfig = $HdtForm.selectedConfig
+			Variables = $CurrentConfig.Variables
+			Scripts = $CurrentConfig.scripts
+			ImportantLogEntries = $ImportantLogEntries
+		} 
+		$ForStateTempJson = ConvertTo-Json -Depth 3 -InputObject $ForStateTempObject 
+		out-file -FilePath $forStateTempFile -InputObject $ForStateTempJson
+		$FilesToGather.add($ForStateTempFile)
 
-        # Create the ZIP file from the temporary folder
-        $zipTempPath = [System.IO.Path]::Combine($tempFolder, "Archive.zip")
-        Compress-Archive -Path (Get-ChildItem -Path $tempFolder -File).FullName -DestinationPath $zipTempPath -Force
+		#ZipFile
+		Out-HdtGather -FilesToGather $FilesToGather -ZipFilePath $zipFilePath
+		Remove-Item -Path $ForStateTempFile
+	} else {
+		Write-Warning "No location selected."
+	}
 
-        # Copy the ZIP file to the desired location
-        Copy-Item -Path $zipTempPath -Destination $ZipFilePath -Force
-
-        Write-Output "ZIP file created successfully: $ZipFilePath"
-    } catch {
-        Write-Error "An error occurred: $_"
-    } finally {
-        # Clean up the temporary folder
-        Remove-Item -Path $tempFolder -Recurse -Force
-    }
+	Pop-Location
 }

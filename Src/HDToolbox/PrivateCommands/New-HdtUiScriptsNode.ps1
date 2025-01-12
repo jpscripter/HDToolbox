@@ -71,17 +71,7 @@ function New-HdtUiScriptsNode {
     $TemplateExecute.tag = @{'HdtForm' = $HdtForm}
     $TemplateExecute.Add_Click({
         param($sender, $e)
-        $menuItem = $PSItem.OriginalSource
-        $contextMenu = $menuItem.Parent
-        $dataGrid = $contextMenu.PlacementTarget
-        $SelectedScripts = $dataGrid.SelectedItems 
-        $selectedConfig = $Sender.tag['HdtForm'].selectedConfig
-        $scriptRef = $Sender.tag['HdtForm'].Configs[$selectedConfig.name].scripts[$dataGrid.name]
-        $scriptRef.value.Where({$PSItem -in $SelectedScripts}).Foreach({$PSItem.state = "Running"; $psitem.Output = ""})
-        $dataGrid.Items.Refresh() 
-        $variablesGrid = $Sender.tag['HdtForm'].Form.FindName("Variables") 
-        Invoke-HdtScript -SelectedScripts $SelectedScripts -AvailableParameters $variablesGrid.Items
-        $dataGrid.UnselectAll()  
+        Start-HdtScript -HdtForm $Sender.tag['HdtForm']
     })
 
     if (-not $NodeGrid) {
@@ -94,7 +84,6 @@ function New-HdtUiScriptsNode {
         $newColumn = new-Object -type System.Windows.Controls.DataGridTextColumn
         $newColumn.Header = $column
         $newColumn.Binding = [System.Windows.Data.Binding]::new($column)
-        
         $NodeGrid.columns.add($newColumn)
     }
 
@@ -106,7 +95,7 @@ function New-HdtUiScriptsNode {
         if (-not ([String]::IsNullOrWhiteSpace($disclaimer))){
             $UserResponse = [System.Windows.Forms.MessageBox]::Show(
                 $disclaimer,
-                $sender.tag['node'].Name + " Disclaimer",
+                $sender.tag['node'].Name + " Legal Notice",
                 [System.Windows.Forms.MessageBoxButtons]::OKCancel, 
                 [System.Windows.Forms.MessageBoxIcon]::Question     
             )
