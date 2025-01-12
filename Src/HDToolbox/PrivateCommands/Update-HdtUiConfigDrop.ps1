@@ -40,9 +40,8 @@ param (
 	$UiConfigSelector.tag = @{'HdtForm'= $HdtForm}
 	$UiConfigSelector.Add_SelectionChanged({
         param($sender, $e)
-		wait-debugger
 		$selection = $e.Source.SelectedItem 
-		$sender.tag['HdtForm'].selectedConfig = $sender.tag['HdtForm'].configs[$selection.name]
+		$sender.tag['HdtForm'].selectedConfig = $sender.tag['HdtForm'].configs[$selection].ConfigDetails
 		Update-HdtUi -HdtForm $HdtForm -Update
 	})
 }
