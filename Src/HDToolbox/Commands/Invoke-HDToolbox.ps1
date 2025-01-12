@@ -89,5 +89,4 @@ param (
     if (-not [String]::IsNullOrEmpty( $scriptSource )){
         Remove-Item -Path  $scriptSource  -Recurse -force -ErrorAction SilentlyContinue
     }
-
 }

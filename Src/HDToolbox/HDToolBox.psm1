@@ -31,6 +31,7 @@ class ConfigStatus {
     [Collections.ObjectModel.ObservableCollection[Object]]$Variables = (New-Object -type Collections.ObjectModel.ObservableCollection[Object])
     [Collections.ObjectModel.ObservableCollection[Object]]$Logs = (New-Object -type Collections.ObjectModel.ObservableCollection[Object])
     [hashtable]$Scripts = @{}
+    [Collections.Generic.HashSet[String]]$logFiles = (new-object Collections.Generic.HashSet[String])
     [String[]]$ExpandedScriptsNodes
 }
 

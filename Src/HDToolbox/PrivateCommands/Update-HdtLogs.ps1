@@ -37,13 +37,11 @@ param (
 )
 	$selectedConfig = $HdtForm.SelectedConfig
 	Write-Debug -Message "HDToolbox logs Update:$($update.ispresent)"
-
+	
 	#logs
 	$LogsGrid = $HdtForm.form.FindName("Logs")
-	$logFiles = New-Object -type Collections.Arraylist
 	if (-not $update.IsPresent){
-		$Script:logsEntries = New-Object -type Collections.ObjectModel.ObservableCollection[Object]
-		$LogsGrid.ItemsSource = $Script:logsEntries 
+		$LogsGrid.ItemsSource = $HdtForm.Configs[$selectedConfig.Name].Logs
 	}
 
 	#get list of logs in variables
@@ -67,16 +65,15 @@ param (
 			[io.Fileinfo[]]$logChildItems = Get-ChildItem -Path $logItem.FullName -Filter *.log -Recurse -File
 			$logChildItems = $logChildItems.Where({(get-date) -lt ($PSItem.LastWriteTime.AddHours($LogMaxAge))})
 			if($logChildItems.count -gt 0){
-				$null = $logfiles.AddRange($logChildItems)
+				$logChildItems.foreach({$Null = $HdtForm.Configs[$selectedConfig.Name].LogFiles.Add($PSItem.Fullname.ToLower())})
 			}
 		}else{
 			If ((get-date) -lt ($logItem.LastWriteTime.AddHours($LogMaxAge))){
-				$Null = $logFiles.Add($logItem.FullName)
+				$Null = $HdtForm.Configs[$selectedConfig.Name].LogFiles.Add($logItem.FullName.ToLower())
 			}
 		}
 	}
 
-		
 	#get Entries from logs
 	try{
 		$LogTailLength = [int]$SelectedConfig.LogTailLength
@@ -89,7 +86,7 @@ param (
 	}
 
 	$KeepScrolling = $LogsGrid.ItemsSource.Count -le ($LogsGrid.SelectedIndex + 2)
-	foreach($log in $logFiles){
+	foreach($log in $HdtForm.Configs[$selectedConfig.Name].LogFiles){
 		$params = @{}
 		if ($LogTailLength -ne 0){
 			$params.add('Tail',$LogTailLength)
@@ -103,15 +100,15 @@ param (
 		}
 		if ($entries.count -gt 0){
 			try{
-				$entries.Foreach({$Script:logsEntries.Add($PSItem)})
+				$entries.Foreach({$HdtForm.Configs[$selectedConfig.Name].Logs.Add($PSItem)})
 			}catch{
 				Write-Warning $PSitem
 			}
 		}
 		#if last selected, keep scrolling
-		If ($KeepScrolling -and ($Script:logsEntries.Count -gt 1)){
-			$LogsGrid.SelectedIndex = $Script:logsEntries.Count - 1
-			$LogsGrid.ScrollIntoView($Script:logsEntries[-1])
+		If ($KeepScrolling -and ($HdtForm.Configs[$selectedConfig.Name].Logs.Count -gt 1)){
+			$LogsGrid.SelectedIndex = $HdtForm.Configs[$selectedConfig.Name].Logs.Count - 1
+			$LogsGrid.ScrollIntoView($HdtForm.Configs[$selectedConfig.Name].Logs[-1])
 		}
 	}
 
