@@ -117,24 +117,51 @@ param (
 	$GatherLogsButton.Add_Click({
 		param($sender, $e)
 
+		$SelectedConfig = $sender.Tag['HdtForm'].selectedConfig
+		$CurrentConfig = $sender.Tag['HdtForm'].Configs[ $sender.Tag['HdtForm'].SelectedConfig.Name]
 		push-location -Path $SelectedConfig.ConfigDirectory
+
 		#save location
 		$saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
 		$saveFileDialog.Filter = "ZIP Files (*.zip)|*.zip"
 		$saveFileDialog.Title = "Select a location to save the ZIP file"
-		$filename = "GatheredFiles_$env:Computername-$($selectedConfig.Name)-$(Get-Date -Format 'yyyyMMddHHmmss').txt"
+		$filename = "GatheredFiles_$env:Computername-$($selectedConfig.Name)-$(Get-Date -Format 'yyyyMMddHHmmss').zip"
 		$saveFileDialog.FileName = $filename  # Default filename
 		if ($saveFileDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
 			$zipFilePath = $saveFileDialog.FileName
+
+			#using hashset to dedup quickly
+			$FilesToGather = (new-object Collections.Generic.HashSet[String])
 			
 			#run scripts
 			$GatherScripts = Get-ChildItem -path $selectedConfig.LogGatherScript
 			Write-verbose -Message "HDToolbox running Gather scripts: $($GatherScripts.FullName)"
-			$FilesToGather = Invoke-HdtGatherScript -ScriptPath $GatherScripts
+			$FilesToGatherFromGather = Invoke-HdtGatherScript -ScriptPath $GatherScripts
+			$FilesToGatherFromGather.foreach({$null = $FilesToGather.add($Psitem)})
+			
+			#gather logs
+			$FilesToGatherFromLogs =  $CurrentConfig.Logfiles
+			$FilesToGatherFromLogs.foreach({$null = $FilesToGather.add($Psitem)})
 
-			#ZipFiles
+			#gather State
+			$ForStateTempFileName = "HDToolboxState_$env:Computername-$($selectedConfig.Name)-$(Get-Date -Format 'yyyyMMddHHmmss').json"
+			$ForStateTempFile = "$env:temp\$ForStateTempFileName"
+			$logGrid = $sender.Tag['HdtForm'].Form.FindName("Logs")
+			$SelectedIndex = $logGrid.SelectedIndex
+			$ImportantLogEntries = $logGrid.ItemsSource[($SelectedIndex-5)..($SelectedIndex+5)]
+			$ForStateTempObject = [PSCustomObject]@{
+				SelectedConfig = $sender.Tag['HdtForm'].selectedConfig
+				Variables = $CurrentConfig.Variables
+				Scripts = $CurrentConfig.scripts
+				ImportantLogEntries = $ImportantLogEntries
+			} 
+			$ForStateTempJson = ConvertTo-Json -Depth 4 -InputObject $ForStateTempObject 
+			out-file -FilePath $forStateTempFile -InputObject $ForStateTempJson
+			$FilesToGather.add($ForStateTempFile)
+
+			#ZipFile
 			Start-HdtGather -FilesToGather $FilesToGather -ZipFilePath $zipFilePath
-
+			Remove-Item -Path $ForStateTempFile
 		} else {
 			Write-Warning "No location selected."
 		}
