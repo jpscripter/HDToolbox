@@ -46,10 +46,23 @@ param (
 	
 	#Update branding
 	$HdtForm.form.Title = "$($SelectedConfig.CompanyName) HelpDesk Toolbox"
+
+	# setting the image by reading the icon into memory
 	$CompanyIcon = Get-Item -Path $SelectedConfig.IconPath
+	$fileBytes = [System.IO.File]::ReadAllBytes($CompanyIcon.FullName)
+	$memoryStream = [System.IO.MemoryStream]::new($fileBytes)
+	$imageSource = New-Object System.Windows.Media.Imaging.BitmapImage
+	$imageSource.BeginInit()
+	$imageSource.StreamSource = $memoryStream
+	$imageSource.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad # Fully load into memory
+	$imageSource.EndInit()
+
 	$UiIcon = $HdtForm.form.FindName("CompanyIcon") 
-	$UiIcon.Source = $CompanyIcon.FullName
-	$HdtForm.form.Icon = $CompanyIcon.FullName
+	$UiIcon.Source = $imageSource
+	$memoryStream.Close()
+	$memoryStream.Dispose()
+
+	#company text
 	$UiCompanyName = $HdtForm.form.FindName("CompanyName") 
 	$UiCompanyName.Text = $SelectedConfig.CompanyName
 	$UiCompanyName = $HdtForm.form.FindName("Banner") 
