@@ -37,9 +37,12 @@ param (
 	$UiConfigSelector.ItemsSource = $HdtForm.Configs.Values.ConfigDetails.name
 	[string[]]$configNames = $HdtForm.Configs.Keys
 	$UiConfigSelector.SelectedIndex = $configNames.IndexOf($hdtForm.selectedConfig.name)
+	$UiConfigSelector.tag = @{'HdtForm'= $HdtForm}
 	$UiConfigSelector.Add_SelectionChanged({
-		$selection = $_.Source.SelectedItem 
-		$UiForm.selectedConfig = $UiForm.configs[$selection]
-		Update-HdtUi -UiForm $UiForm -Update
+        param($sender, $e)
+		wait-debugger
+		$selection = $e.Source.SelectedItem 
+		$sender.tag['HdtForm'].selectedConfig = $sender.tag['HdtForm'].configs[$selection.name]
+		Update-HdtUi -HdtForm $HdtForm -Update
 	})
 }

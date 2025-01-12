@@ -16,8 +16,7 @@
         {
             "Name" : "Tests",
             "Expanded":"Visible",
-            "Scripts":".\\Tests\\",
-            "Disclaimer": "These scripts are used to do high level diagnostics."
+            "Scripts":".\\Tests\\"
         },
         {
             "Name" : "Remediation",

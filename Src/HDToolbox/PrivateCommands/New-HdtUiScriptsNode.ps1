@@ -71,7 +71,6 @@ function New-HdtUiScriptsNode {
     $TemplateExecute.tag = @{'HdtForm' = $HdtForm}
     $TemplateExecute.Add_Click({
         param($sender, $e)
-        Wait-Debugger
         $menuItem = $PSItem.OriginalSource
         $contextMenu = $menuItem.Parent
         $dataGrid = $contextMenu.PlacementTarget
@@ -89,6 +88,7 @@ function New-HdtUiScriptsNode {
         Throw "Template grid not found in the expander."
     }
     $NodeGrid.ItemsSource = $HdtForm.configs[$HdtForm.selectedConfig.Name].scripts[$node.name]
+    
     # add columns
     foreach ($column in $Columns.keys){
         $newColumn = new-Object -type System.Windows.Controls.DataGridTextColumn
@@ -97,5 +97,23 @@ function New-HdtUiScriptsNode {
         
         $NodeGrid.columns.add($newColumn)
     }
+
+    #add Disclamer
+    $NodeExpander.Tag = @{'node' = $node}
+    $NodeExpander.add_Expanded({
+        param($sender, $e)
+        $disclaimer = $sender.tag['node'].Disclaimer
+        if (-not ([String]::IsNullOrWhiteSpace($disclaimer))){
+            $UserResponse = [System.Windows.Forms.MessageBox]::Show(
+                $disclaimer,
+                $sender.tag['node'].Name + " Disclaimer",
+                [System.Windows.Forms.MessageBoxButtons]::OKCancel, 
+                [System.Windows.Forms.MessageBoxIcon]::Question     
+            )
+            if ($UserResponse -eq [System.Windows.MessageBoxResult]::Cancel){
+                $sender.IsEnabled = $false
+            }
+        }
+    })
     return $NodeExpander
 }
