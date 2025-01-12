@@ -7,14 +7,8 @@ This script Updates a user-friendly GUI for interacting with the HDToolbox tool.
 
 Users can also view outputs and save processed results directly from the GUI.  
 
-.PARAMETER UiForm
-The base Window object to update
-
-.PARAMETER Configs
-The All Config Object
-
-.PARAMETER SelectedConfig
-The Selected Config Object
+.PARAMETER Form
+The HDTForm Window object to update
 
 
 .EXAMPLE
@@ -33,126 +27,49 @@ TBD
 Function Update-HdtUi {
 [CmdletBinding()]
 param (
-	[Ref]
-	$Form,
-
-	[PSCustomObject[]] 
-	$configs,
-
-	[PSCustomObject]
-	$SelectedConfig,
+	[HdtForm]
+	$HdtForm,
 
 	[Switch] $Update
 )
-	push-location -Path $SelectedConfig.ConfigDirectory
-	
-	#Update Dimentions
-	if ($Null -ne $SelectedConfig.Height){
-		$form.Value.Height = $SelectedConfig.Height
-	}
-	if ($Null -ne $SelectedConfig.Width){
-		$form.Value.Width = $SelectedConfig.Width
-	}
-	
-	#Update branding
-	Write-verbose -Message "HDToolbox Customizing UI for $($selectedConfig.CompanyName)"
-	$form.Value.Title = "$($SelectedConfig.CompanyName) HelpDesk Toolbox"
-	$CompanyIcon = Get-Item -Path $SelectedConfig.IconPath
-	$UiIcon = $form.Value.FindName("CompanyIcon") 
-	$UiIcon.Source = $CompanyIcon.FullName
-	$form.Value.Icon = $CompanyIcon.FullName
-	$UiCompanyName = $form.Value.FindName("CompanyName") 
-	$UiCompanyName.Text = $SelectedConfig.CompanyName
-	$UiCompanyName = $form.Value.FindName("Banner") 
-	$UiCompanyName.Background = $SelectedConfig.BannerColor
 
-	#Update Configuration 
-	$UiConfigSelector = $form.Value.FindName('ConfigSelector')
-	$UiConfigSelector.ItemsSource = [String[]]$configs.name
-	If(-not ($Update.IsPresent)){
-		$UiConfigSelector.SelectedIndex = $Configs.Name.IndexOf($selectedConfig.name)
-		$UiConfigSelector.Add_SelectionChanged({
-			$selection = $_.Source.SelectedItem 
-			$selectedConfig = $configs.Where({$PSItem.Name -eq $selection})
-			Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs -Update
-		})
+	#Update Dimentions
+	Update-HdtUiBranding -HdtForm $HdtForm
+
+	#Update config
+	if (-not ($update.IsPresent)){
+		Write-Debug -Message "HDToolbox UI is updating configs"
+		Update-HdtUiConfigDrop -HdtForm $HdtForm
 	}
 
 	#update Variables 
-	$variablesGrid = $form.Value.FindName("Variables") 
-	if ($script:ConfigSettings[$selectedConfig.name].Variables.Count -lt 1){
-		$variableScript = Get-ChildItem -path $selectedConfig.VariableScript
-		Write-verbose -Message "HDToolbox running variable script: $($variableScript.FullName)"
-		[PSCustomObject[]]$AvailableVariables = Invoke-HdtVariableScript -ScriptPath $variableScript
-		Foreach($AvailableVariable in $AvailableVariables){
-			$null = $script:ConfigSettings[$selectedConfig.name].Variables.Add($AvailableVariable)
-		}
-	}
-	$variablesGrid.ItemsSource = $script:ConfigSettings[$selectedConfig.name].Variables
+	Update-HdtUiVariables -HdtForm $HdtForm
 
 	# Update Script Nodes
 	Write-verbose -Message "HDToolbox Removing old script Nodes"
-	Remove-HdtUiScriptsNode -Form ([Ref]$form.Value) #Remove old script nodes
+	Remove-HdtUiScriptsNode -HdtForm $HdtForm
 
-	$TemplateScriptExpander = $form.Value.FindName("TemplateExpander")
-	$GridRows = $form.Value.FindName("GridRows")
-	$xamlTemplate = [System.Windows.Markup.XamlWriter]::Save($TemplateScriptExpander)
-	$parent = $TemplateScriptExpander.Parent
-	$index = $GridRows.RowDefinitions.IndexOf($form.Value.FindName("VariableGridRow")) 
-	$index++ 
-	Foreach ($node in $SelectedConfig.Nodes){
-		Write-verbose -Message "HDToolbox Adding script Node: $($node.Name)"
-		$scripts = Get-ChildItem -path $node.Scripts -Recurse -filter *.ps1
-		If ($scripts.count -lt 1){
-			Write-Warning -Message "Node ($($node.name)):No Scripts found in $($node.Scripts)"
-			Continue
-		}
-		$NewRow = [System.Windows.Controls.RowDefinition]::new()
-		$NewRow.Height = "Auto"
-		$NewRow.Name = "$($node.Name)GridRow"
-		$GridRows.RowDefinitions.Insert($index ,$NewRow)
-		$nodeExpander = New-HdtUiScriptsNode -Node $node -XamlString $xamlTemplate
-		[System.Windows.Controls.Grid]::SetRow($nodeExpander,$index)
-		$Parent.Children.Insert($index, $NodeExpander)
-
-		#Add Variables
-		$variablesGrid = $form.Value.FindName("Variables") 
-		:script foreach($script in $nodeExpander.Content.Items){
-			:parameter foreach ($param in $script.Parameters.Split(';')){
-				if ($variablesGrid.items.VariableName -contains $param -or [string]::IsNullOrWhiteSpace($param)){
-					Continue parameter
-				}
-				Write-verbose -Message "HDToolbox New Missing Parameter: $param"
-				$AvailableVariableScript = ([PSCustomObject]@{
-					VariableName = $param
-					Value = ''
-					Source = $script.name
-				})
-				$null = $script:ConfigSettings[$selectedConfig.name].Variables.Add($AvailableVariableScript)
-			}
-		}
-		$index++ 
-	}
+	Write-verbose -Message "HDToolbox Adding Script Nodes"
+	Update-HdtUiScriptsNode -HdtForm $HdtForm
 
 	#logs
 	Write-verbose -Message "HDToolbox adding Logs"
-	$LogsExpanderGrid = $form.Value.FindName("LogsExpander")
-	$GridRows = $form.Value.FindName("GridRows")
-	$index = $GridRows.RowDefinitions.IndexOf($form.Value.FindName("LogGridRow")) 
+	$LogsExpanderGrid = $HdtForm.form.FindName("LogsExpander")
+	$GridRows = $HdtForm.form.FindName("GridRows")
+	$index = $GridRows.RowDefinitions.IndexOf($HdtForm.form.FindName("LogGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($LogsExpanderGrid,$index)
-	Update-HdtLogs -form $form -SelectedConfig $SelectedConfig
+	Update-HdtLogs -HdtForm $HdtForm
 
 	#Update on timer
 	if (-not ($Update.IsPresent)){
 		Write-verbose -Message "HDToolbox Setting Refresh timer for logs"
 		$Timer = New-Object System.Windows.Forms.Timer
 		$Timer.Interval = 1000  # Timer interval in milliseconds (1000 ms = 1 second)
-		$timer.tag = @{'form' = $form}
-
+		$timer.tag = @{'HdtForm' = $HdtForm}
 		$Null = $Timer.Add_Tick({
 			param($sender, $e)
 			# Update the label text with the current time
-			Update-HdtLogs -form $sender.Tag['form'] -SelectedConfig $SelectedConfig -Update
+			Update-HdtLogs -HdtForm $sender.Tag['HdtForm'] -Update
 		})
 		$timer.Add_Tick({
 			param($sender, $e)
@@ -163,7 +80,7 @@ param (
                     continue RunspaceMonitoring
                 }
 				$runspace = $details.Runspace
-				$Parent = $sender.Tag['form'].value.FindName('TemplateExpander').Parent
+				$Parent = $sender.Tag['HdtForm'].Form.FindName('TemplateExpander').Parent
 				$gridExpander = $parent.Children.where({$psitem.name -eq ($details.Script.Grid + 'ScriptExpander')})
 				$grid = $gridExpander.Content
                 $warnings = $runspace.Streams.Warning -join '\n '
@@ -193,10 +110,13 @@ param (
 	}
 
 	#Buttons
-	$GatherLogsButton = $form.Value.FindName("GatherLogs")
-	$index = $GridRows.RowDefinitions.IndexOf($form.Value.FindName("ButtonGridRow")) 
+	$GatherLogsButton = $HdtForm.form.FindName("GatherLogs")
+	$index = $GridRows.RowDefinitions.IndexOf($HdtForm.form.FindName("ButtonGridRow")) 
 	[System.Windows.Controls.Grid]::SetRow($GatherLogsButton,$index)
+	$GatherLogsButton.tag = @{'HdtForm' = $HdtForm}
 	$GatherLogsButton.Add_Click({
+		param($sender, $e)
+
 		push-location -Path $SelectedConfig.ConfigDirectory
 		#save location
 		$saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog

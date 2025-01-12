@@ -9,20 +9,18 @@ This cmdlet Reverts and removes UI expanders for a given node
 The Form ref object 
 
 .EXAMPLE
-Remove-HdtUiScriptsNode -form ([ref]$UIForm)
+Remove-HdtUiScriptsNode -HdtForm $HdtForm
 
 #>
 function Remove-HdtUiScriptsNode {
     [CmdletBinding()]
     param (
-        [Ref]
-        $Form   
+        [HdtForm]
+        $HdtForm   
     )
 
-    $UiForm = $form.Value
-
     #Find All Script Nodes
-    $GridRows = $uiform.FindName("GridRows")
+    $GridRows = $HdtForm.form.FindName("GridRows")
     $ScriptNodes = $GridRows.Children.Where({$PSitem.Name -like '*ScriptExpander'})
     :node foreach ($node in $ScriptNodes){
         $NodeName = $node.Header

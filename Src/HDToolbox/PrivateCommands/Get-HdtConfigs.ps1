@@ -26,7 +26,9 @@ Function Get-HdtConfigs {
 	param (
 		[Parameter()]
 		[io.DirectoryInfo]
-		$Source 
+		$Source,
+
+		[object] $HdtForm
 	)
 	$Configs = New-Object Collections.Arraylist
 
@@ -40,7 +42,7 @@ Function Get-HdtConfigs {
 			$null = Add-Member -inputObject $configObject -name ConfigDirectory -value $configFile.Directory -Type NoteProperty
 			if ( -not [string]::IsNullOrWhiteSpace($configObject.VariableScript)){
 				$null = $configs.Add($configObject)
-				Write-Debug -Message "`t Adding $($configObject.Name)"
+				Write-Debug -Message "`t Found $($configObject.Name)"
 			}
 		}
 		catch {
@@ -48,16 +50,16 @@ Function Get-HdtConfigs {
 		}
 	}
 
-	$script:ConfigSettings = @{}
-
+	#add configs to Form Object for tracking and internal usage
 	Foreach($config in $Configs){
-		$configSettingsTempObj = [PSCustomObject]@{
-			Variables = New-Object -type Collections.ObjectModel.ObservableCollection[Object]
-			Logs = New-Object -type Collections.ObjectModel.ObservableCollection[Object]
-			Scripts = @{}
-		}
-		$script:ConfigSettings.Add($Config.Name, $configSettingsTempObj)
-	}
+		Write-Debug -Message "`t Adding config $($config.Name)"
 
-	return $Configs
+		if ($null -eq $HdtForm.SelectedConfig){
+			$HdtForm.SelectedConfig = $Config
+		}
+		$configSettingsTempObj = [ConfigStatus] @{
+			ConfigDetails = $config
+		}
+		$HdtForm.Configs.Add($Config.Name, $configSettingsTempObj)
+	}
 }

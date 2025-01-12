@@ -26,23 +26,26 @@ TBD
 Function New-HdtUi {
 [CmdletBinding()]
 param (
-	[Parameter()]
-	[io.DirectoryInfo]
-	$ScriptRoot
+
 )
 	Write-verbose -Message "HDToolbox Building UI"
 	$myModulePath = Get-Module HDToolbox
 	[io.FileInfo]$selectedXaml = "$($myModulePath.ModuleBase)\app.xaml"
 	if (-not $selectedXaml.exists){
-		Throw "No Xaml Files found in $($scriptRoot)"
+		Throw "No Xaml Files found in $($myModulePath.ModuleBase)"
 	}
+	Write-Debug "Using xaml file $($selectedXaml.FullName)"
+	
 	#region Get UI Template
 	$WindowXamlText = Get-Content -raw $selectedXaml 
 	$inputXML = $WindowXamlText -replace 'mc:Ignorable="d"','' -replace "x:N",'N'  -replace '^<Win.*', '<Window'
 	[xml]$xamlTemplate = $inputXML
 	$reader = (New-Object System.Xml.XmlNodeReader $xamlTemplate)
-	$UiForm = [Windows.Markup.XamlReader]::Load( $reader )
+	$Form = [Windows.Markup.XamlReader]::Load( $reader )
+	$HdtForm = [HdtForm]@{
+		form = $form
+	}
+	Write-Debug "Form made"
 
-	#Add for Updating from Scripts
-	return $UiForm
+	return $HdtForm
 }

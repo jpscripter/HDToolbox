@@ -48,43 +48,46 @@ param (
         $ConfigSourceDirectory = get-Item -path $ConfigSource 
     }
 
+    #making sure config's module folder is in the ps module path
     Write-verbose -Message "HDToolbox Local Config location:  $($ConfigSourceDirectory.FullName)"
     $configsModulePath = "$($ConfigSourceDirectory.FullName)\Modules"
     if (-not ($env:PSModulePath.split(';') -contains $configsModulePath)){
-        Write-Debug -Message "HDToolbox Local Config location:  $($ConfigSourceDirectory.FullName)"
+        Write-Debug -Message "Adding to module path:  $($ConfigSourceDirectory.FullName)"
         $env:PSModulePath += ";$configsModulePath"
     }
     #endregion
 
     #region Initial UI setup
-    [object[]]$Configs = Get-hdtConfigs -Source $ConfigSourceDirectory
-    try{
-        Write-Debug -Message "HDToolbox found $($Configs.count) Configs"
-        $selectedConfig = $Configs[0]
-        Write-verbose -Message "HDToolbox starting with $($selectedConfig.Name) Config"
-    }
-    catch {
-        Throw "No Config Found"
-    }
+    $HdtForm = New-HdtUi
+
+    #Load configs
+    Get-hdtConfigs -Source $ConfigSourceDirectory -HdtForm $HdtForm
+    Write-Verbose -Message "HDToolbox found $($HdtForm.Configs.keys.count) Configs"
+
     If (![String]::IsNullOrWhiteSpace($InitialConfig)){
-        $selectedConfig = $Configs.Where({$psitem.name -eq $InitialConfig})
-        if ($selectedConfig.count -eq 0) {
+        try{
+            $HdtForm.selectedConfig = $HdtForm.Configs[$InitialConfig]
+        }
+        catch{
             Throw "Selected $Config not found in $($scriptRoot)"
         }
     }
-
-    $UiForm = New-HdtUi -ScriptRoot $ScriptRoot 
     #endregion
 
     #region Config UI 
-    Update-HdtUi -SelectedConfig $selectedConfig -Form ([Ref]$UiForm) -configs $configs
+    Update-HdtUi -HdtForm $HdtForm 
     #endregion
+
+    #Launch Dialog
     $script:syncHash['ContinueMonitoring'] = $True
-    $uiform.ShowDialog()
+    $HdtForm.form.ShowDialog()
+    $HdtForm.form.Close()
+    $HdtForm = $null
+    [GC]::collect()
     $script:syncHash['ContinueMonitoring'] = $false
 
     if (-not [String]::IsNullOrEmpty( $scriptSource )){
-        $uiform = $null
         Remove-Item -Path  $scriptSource  -Recurse -force -ErrorAction SilentlyContinue
     }
+
 }

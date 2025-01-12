@@ -16,12 +16,15 @@
         {
             "Name" : "Tests",
             "Expanded":"Visible",
-            "Scripts":".\\Tests\\"
+            "Scripts":".\\Tests\\",
+            "Disclaimer": "These scripts are used to do high level diagnostics."
         },
         {
             "Name" : "Remediation",
             "Expanded":"Visible",
-            "Scripts":".\\Remediation\\"
+            "Scripts":".\\Remediation\\",
+            "Disclaimer": "These scripts will make changes to the system configuration and should only be run at only  "
+
         }
     ],
     "LogFiles" : [

@@ -15,7 +15,23 @@ class ScriptModel {
     [string]$Parameters
     [string]$Grid
     [Nullable[ScriptState]]$State 
+    [String]$Signature
+    [String]$SignatureThumbPrint
     [string]$FullPath
+}
+
+class HdtForm {
+    [object] $form
+    [hashtable] $Configs = @{}
+    [Object] $selectedConfig
+}
+
+class ConfigStatus {
+    [Object] $ConfigDetails
+    [Collections.ObjectModel.ObservableCollection[Object]]$Variables = (New-Object -type Collections.ObjectModel.ObservableCollection[Object])
+    [Collections.ObjectModel.ObservableCollection[Object]]$Logs = (New-Object -type Collections.ObjectModel.ObservableCollection[Object])
+    [hashtable]$Scripts = @{}
+    [String[]]$ExpandedScriptsNodes
 }
 
 if (Test-Path -Path $PSScriptRoot\PrivateCommands\){

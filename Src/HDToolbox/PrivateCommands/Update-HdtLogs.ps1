@@ -29,20 +29,17 @@ TBD
 Function Update-HdtLogs {
 [CmdletBinding()]
 param (
-	[Ref]
-	$Form,
-
-	[PSCustomObject]
-	$SelectedConfig,
+	[HdtForm]
+	$HdtForm,
 
 	[switch]
 	$update
 )
-	$uiForm = $form.Value
+	$selectedConfig = $HdtForm.SelectedConfig
 	Write-Debug -Message "HDToolbox logs Update:$($update.ispresent)"
 
 	#logs
-	$LogsGrid = $uiform.FindName("Logs")
+	$LogsGrid = $HdtForm.form.FindName("Logs")
 	$logFiles = New-Object -type Collections.Arraylist
 	if (-not $update.IsPresent){
 		$Script:logsEntries = New-Object -type Collections.ObjectModel.ObservableCollection[Object]
@@ -56,7 +53,7 @@ param (
 		Write-warning -message "Cannot convert LogMaxAge $($SelectedConfig.LogMaxAge) to int"
 		$LogMaxAge = 24
 	}
-	[PSCustomobject[]]$VariableLogs = $uiform.FindName("Variables").ItemsSource.Where({$psitem.VariableName -Like "Log*"}).Value
+	[PSCustomobject[]]$VariableLogs = $HdtForm.Form.FindName("Variables").ItemsSource.Where({$psitem.VariableName -Like "Log*"}).Value
 	:LogFiles foreach($log in ($VariableLogs + $SelectedConfig.LogFiles)){
 		if ((($null -eq $Log) -or -not (Test-Path -Path $log)))
 		{
