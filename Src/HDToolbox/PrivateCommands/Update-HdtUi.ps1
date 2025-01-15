@@ -106,4 +106,11 @@ param (
 		param($sender, $e)
 		Start-HdtExit -HdtForm $sender.Tag['HdtForm']
 	})
+
+	$GatherMenu = $HdtForm.form.FindName("GatherHdt")
+	$GatherMenu.tag = @{'HdtForm' = $HdtForm}
+	$GatherMenu.Add_Click({
+		param($sender, $e)
+		Start-HdtGather -HdtForm $sender.Tag['HdtForm']
+	})
 }
