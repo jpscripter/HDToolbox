@@ -33,17 +33,7 @@ function New-HdtUiScriptsNode {
         [string]$XamlString,
 
         [Parameter(Mandatory = $true)]
-        [HdtForm]$HdtForm,
-
-        [HashTable]$Columns = [Ordered]@{
-            'Folder'= $Null
-            'Name'= $Null
-            'Output'= 300
-            'Synopsis'= $Null
-            'Parameters'= $Null
-            'Signature' = $null
-            'SignatureThumbPrint' = $null
-        }
+        [HdtForm]$HdtForm
     )
     # Retrieve scripts from the specified path
     if ($HdtForm.configs[$HdtForm.selectedConfig.Name].scripts[$node.name].Count -lt 1) {
@@ -80,11 +70,26 @@ function New-HdtUiScriptsNode {
     $NodeGrid.ItemsSource = $HdtForm.configs[$HdtForm.selectedConfig.Name].scripts[$node.name]
     
     # add columns
+    $Columns = [Ordered]@{
+        'Folder'= 100
+        'Name'= 150
+        'Output'= $null
+        'Synopsis'= $Null
+        'Parameters'= $Null
+        'Signature' = $null
+        'SignatureStatus' = $null
+        'SignatureThumbPrint' = $null
+    }
+    $index = 0
     foreach ($column in $Columns.keys){
         $newColumn = new-Object -type System.Windows.Controls.DataGridTextColumn
         $newColumn.Header = $column
         $newColumn.Binding = [System.Windows.Data.Binding]::new($column)
+        if ($null -ne $columns[$column]){
+            $newColumn.Width = $columns[$column]
+        }
         $NodeGrid.columns.add($newColumn)
+        $index++
     }
 
     #add Disclamer

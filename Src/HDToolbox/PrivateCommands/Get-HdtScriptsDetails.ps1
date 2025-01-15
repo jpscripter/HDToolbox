@@ -49,7 +49,9 @@ function Get-HdtScriptsDetails {
     )
     $scriptObjects = New-Object -TypeName Collections.ObjectModel.ObservableCollection[Object]
     foreach ($script in $scripts) {
+        $Signature = Get-AuthenticodeSignature $script.FullName
         $help = Get-Help $script.FullName -Detailed
+
         $obj = [ScriptModel]@{
             Name       = $script.BaseName
             Synopsis   = $help.SYNOPSIS
@@ -57,6 +59,12 @@ function Get-HdtScriptsDetails {
             Folder     = $script.Directory.Name
             FullPath   = $script.FullName
             Grid       = $Node.Name
+            Signature  = $Signature.SignerCertificate.Subject 
+            SignatureStatus = $Signature.status
+        }
+        if ($Signature.status -eq 'Valid'){
+
+            $obj.SignatureThumbPrint  = $Signature.SignerCertificate.Thumbprint.ToString()
         }
         $null = $scriptObjects.Add($obj)
     }

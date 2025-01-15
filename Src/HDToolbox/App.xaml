@@ -7,8 +7,26 @@
         mc:Ignorable="d"
         Title="Help Desk Toolbox" Height="800" Width="800">
     <Grid>
+         <!-- Define the Menu -->
+        <Menu VerticalAlignment="Top">
+            <MenuItem Header="_File">
+                <!-- Submenu under Open -->
+                <MenuItem Header="_Open">
+                    <MenuItem Header="_Log" Name="OpenLog"/>
+                    <MenuItem Header="_Script" Name="OpenScript"/>
+                    <MenuItem Header="_Config" Name="OpenConfig"/>
+                </MenuItem>
+                <MenuItem Header="_Gather" Name="GatherHdt"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Name="ExitHdt"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Name="About" />
+            </MenuItem>
+        </Menu>
+
         <!-- Banner -->
-        <Border Name="Banner" Background="Gray" Height="40" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+        <Border Name="Banner" Background="Gray" Height="40" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,20">
             <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -22,7 +40,7 @@
         </Border>
 
         <!-- Main Content -->
-        <Grid Name="GridRows" Margin="0,40,0,0">
+        <Grid Name="GridRows" Margin="0,60,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Name="VariableGridRow" Height="Auto"/>   <!-- VariablesExpander row -->
                 <RowDefinition Name="LogGridRow" Height="*"/>           <!-- LogsExpander row (remaining space) -->

@@ -13,6 +13,7 @@ class ScriptModel {
     [string]$Grid
     [Nullable[ScriptState]]$State 
     [String]$Signature
+    [string]$SignatureStatus
     [String]$SignatureThumbPrint
     [string]$FullPath
 }
@@ -21,6 +22,7 @@ class HdtForm {
     [object] $form
     [hashtable] $Configs = @{}
     [Object] $selectedConfig
+    [hashtable] $scriptContent 
 }
 
 class ConfigStatus {

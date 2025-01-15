@@ -91,5 +91,19 @@ param (
 		param($sender, $e)
 		Start-HdtGather -HdtForm $sender.Tag['HdtForm']
 	})
-	pop-location
+
+	#Menu
+	$AboutMenu = $HdtForm.form.FindName("About")
+	$AboutMenu.tag = @{'HdtForm' = $HdtForm}
+	$AboutMenu.Add_Click({
+		param($sender, $e)
+		Start-HdtAbout -HdtForm $sender.Tag['HdtForm']
+	})
+
+	$ExitMenu = $HdtForm.form.FindName("ExitHdt")
+	$ExitMenu.tag = @{'HdtForm' = $HdtForm}
+	$ExitMenu.Add_Click({
+		param($sender, $e)
+		Start-HdtExit -HdtForm $sender.Tag['HdtForm']
+	})
 }
