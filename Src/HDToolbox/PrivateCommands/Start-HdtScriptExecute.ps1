@@ -23,7 +23,7 @@ Start-HdtScript -Node $node -XamlString $xamlString
 .NOTESHdtForm
 Ensure the node object contains valid script paths and the XAML template is well-formed.
 #>
-function Start-HdtScript {
+function Start-HdtScriptExecute {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
@@ -39,7 +39,7 @@ function Start-HdtScript {
         $scriptRef.value.Where({$PSItem -in $SelectedScripts}).Foreach({$PSItem.state = "Running"; $psitem.Output = ""})
         $dataGrid.Items.Refresh() 
         $variablesGrid = $HdtForm.Form.FindName("Variables") 
-        Invoke-HdtScript -SelectedScripts $SelectedScripts -AvailableParameters $variablesGrid.Items
+        Invoke-HdtScript -SelectedScripts $SelectedScripts -AvailableParameters $variablesGrid.Items -HdtForm $HdtForm
         $dataGrid.UnselectAll()  
     
 }

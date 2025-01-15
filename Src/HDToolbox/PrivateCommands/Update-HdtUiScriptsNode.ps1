@@ -57,6 +57,13 @@ param (
 			# Collect script metadata
 			[Collections.ObjectModel.ObservableCollection[Object]]$scriptDetails = Get-HdtScriptsDetails -Scripts $scripts
 			$null = $Config.scripts.Add($Node.name, $scriptDetails)
+			[HashTable]$scriptContent += Get-HdtScriptsContent -Scripts $scripts
+			foreach($ScriptPath in $scriptContent.Keys)
+			{
+				if($ScriptPath -NotIn $HdtForm.ScriptContent.keys){
+					$null =$HdtForm.ScriptContent.Add($ScriptPath, $scriptContent[$ScriptPath])
+				}
+			}
 		}
 
 		#make Node

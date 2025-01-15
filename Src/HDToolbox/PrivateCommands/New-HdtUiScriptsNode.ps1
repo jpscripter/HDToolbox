@@ -61,7 +61,7 @@ function New-HdtUiScriptsNode {
     $TemplateExecute.tag = @{'HdtForm' = $HdtForm}
     $TemplateExecute.Add_Click({
         param($sender, $e)
-        Start-HdtScript -HdtForm $Sender.tag['HdtForm']
+        Start-HdtScriptExecute -HdtForm $Sender.tag['HdtForm']
     })
 
     if (-not $NodeGrid) {

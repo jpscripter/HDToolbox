@@ -22,7 +22,7 @@ class HdtForm {
     [object] $form
     [hashtable] $Configs = @{}
     [Object] $selectedConfig
-    [hashtable] $scriptContent 
+    [hashtable] $scriptContent = @{}
 }
 
 class ConfigStatus {

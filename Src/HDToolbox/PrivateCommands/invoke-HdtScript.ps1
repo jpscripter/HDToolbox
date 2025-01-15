@@ -31,7 +31,10 @@ function Invoke-HdtScript {
         [PSCustomObject[]]
         $SelectedScripts,
         [PSCustomObject[]]
-        $AvailableParameters
+        $AvailableParameters,
+
+        [Parameter(Mandatory = $true)]
+        [HdtForm]$HdtForm
     )
 
     :script foreach ($script in $SelectedScripts){
@@ -42,7 +45,7 @@ function Invoke-HdtScript {
 
         # Create a runspace and script block
         $runspace = [powershell]::Create()
-        $AddedCommand = $runspace.AddScript([System.IO.File]::ReadAllText($Script.FullPath))
+        $AddedCommand = $runspace.AddScript($HdtForm.ScriptContent[$Script.FullPath])
         $runspace.RunspacePool = $Script:runspacePool
 
         # add params to runspace
