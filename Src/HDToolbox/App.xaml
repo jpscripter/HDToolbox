@@ -10,7 +10,7 @@
     <Window.Resources>
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="Gray"/>
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Foreground" Value="Black" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Padding" Value="10" />
             <Setter Property="BorderThickness" Value="0" />
@@ -36,6 +36,22 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+        <Style x:Key="ModernExpander" TargetType="Expander">
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style x:Key="ModernGrid" TargetType="DataGrid">
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontWeight" Value="Normal" />
         </Style>
     </Window.Resources>
 
@@ -94,16 +110,20 @@
         <!-- Main Content -->
         <Grid Name="GridRows" Margin="0,80,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Name="VariableGridRow" Height="Auto" />   <!-- VariablesExpander row -->
-                <RowDefinition Name="LogGridRow" Height="*" />           <!-- LogsExpander row (remaining
+                <RowDefinition Name="VariableGridRow" Height="Auto" />
+                <!-- VariablesExpander row -->
+                <RowDefinition Name="LogGridRow" Height="*" />
+                <!-- LogsExpander row (remaining
                 space) -->
-                <RowDefinition Name="ButtonGridRow" Height="Auto" />     <!-- Button row -->
+                <RowDefinition Name="ButtonGridRow" Height="Auto" />
+                <!-- Button row -->
             </Grid.RowDefinitions>
 
             <!-- Variables Expander -->
-            <Expander Name="VariablesExpander" Header="Variables"
+            <Expander Name="VariablesExpander" Header="Variables" Style="{StaticResource ModernExpander}"
                 IsExpanded="True"  Grid.Row="0">
-                <DataGrid Name="Variables" IsReadOnly="False" FontSize="12"
+                <DataGrid Name="Variables" IsReadOnly="False"
+                    Style="{StaticResource ModernGrid}"
                     AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="VariableName" Binding="{Binding VariableName}"
@@ -125,8 +145,10 @@
 
             <!-- Logs Expander -->
             <Expander Name="LogsExpander" Header="Logs" IsExpanded="True"
+                Style="{StaticResource ModernExpander}"
                 Grid.Row="1">
-                <DataGrid Name="Logs" GridLinesVisibility="none" IsReadOnly="True"
+                <DataGrid Name="Logs"  IsReadOnly="True"
+                    Style="{StaticResource ModernGrid}"
                     SelectionMode="Single" AutoGenerateColumns="False">
 
                     <DataGrid.Columns>
@@ -167,8 +189,9 @@
                 Grid.Row="2" />
 
             <!-- Template Expander -->
-            <Expander Name="TemplateExpander" Header="Template" Margin="5" IsExpanded="false" Visibility="Hidden" >
+            <Expander Name="TemplateExpander" Header="Template" IsExpanded="false" Visibility="Hidden"  Style="{StaticResource ModernExpander}" >
                 <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Extended" 
+                    Style="{StaticResource ModernGrid}"
                     AutoGenerateColumns="false">
                     <DataGrid.ContextMenu>
                         <ContextMenu>
