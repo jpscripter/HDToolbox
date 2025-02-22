@@ -52,6 +52,7 @@
             <Setter Property="GridLinesVisibility" Value="None"/>
             <Setter Property="Foreground" Value="Black" />
             <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="FontSize" Value="14" />
         </Style>
     </Window.Resources>
 
@@ -152,7 +153,7 @@
                     SelectionMode="Single" AutoGenerateColumns="False">
 
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="300" />
+                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*" />
                         <DataGridTextColumn Header="DateTime" Binding="{Binding Datetime}"
                             Width="200" />
                         <DataGridTextColumn Header="severity" Binding="{Binding severity}"
@@ -160,8 +161,8 @@
                         <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="100"
                         />
                         <DataGridTextColumn Header="Component" Binding="{Binding Component}"
-                            Width="100" />
-                        <DataGridTextColumn Header="Details" Binding="{Binding details}" Width="200"
+                            Width="50" />
+                        <DataGridTextColumn Header="Details" Binding="{Binding details}" Width="50"
                         />
                         <DataGridTextColumn Header="Thread" Binding="{Binding thread}" Width="50"
                         />
