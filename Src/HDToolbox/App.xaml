@@ -9,14 +9,7 @@
 
     <Window.Resources>
         <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#FF6A5ACD" Offset="0.0" />
-                        <GradientStop Color="#FF836FFF" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="Gray"/>
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Padding" Value="10" />
@@ -26,30 +19,20 @@
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="10" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                            CornerRadius="15" Name="border">
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="0"
+                        CornerRadius="10"
+                            Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center"
-                                VerticalAlignment="Center" />
+                                      VerticalAlignment="Center"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background">
-                                    <Setter.Value>
-                                        <SolidColorBrush Color="#FF836FFF" />
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background">
-                                    <Setter.Value>
-                                        <SolidColorBrush Color="#FF6A5ACD" />
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -76,37 +59,40 @@
         </Menu>
 
         <!-- Banner -->
-<Border Name="Banner" Background="#2C3E50" Height="60" VerticalAlignment="Top"
-        HorizontalAlignment="Stretch" Margin="0,20" CornerRadius="10">
-    <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        
-        <!-- Company Icon -->
-        <Image Name="CompanyIcon" Source="path/to/icon.png" Height="40" VerticalAlignment="Center"
-               HorizontalAlignment="Left" Margin="15,0" Grid.Column="0" />
+        <Border Name="Banner" Background="#2C3E50" Height="60" VerticalAlignment="Top"
+            HorizontalAlignment="Stretch" Margin="0,20" CornerRadius="10">
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <!-- Company Name -->
-        <TextBlock Name="CompanyName" Text="My Company" FontSize="26" FontWeight="Bold"
-                   VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"
-                   Margin="15,0" Grid.Column="1" />
+                <!-- Company Icon -->
+                <Image Name="CompanyIcon" Source="path/to/icon.png" Height="40"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left" Margin="15,0" Grid.Column="0" />
 
-        <!-- Configuration Section -->
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right"
+                <!-- Company Name -->
+                <TextBlock Name="CompanyName" Text="My Company" FontSize="26" FontWeight="Bold"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"
+                    Margin="15,0" Grid.Column="1" />
+
+                <!-- Configuration Section -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
                     Grid.Column="2" Margin="15,0">
-            <TextBlock Text="Configs:" VerticalAlignment="Center" FontSize="16" Foreground="White"
-                       Margin="0,0,5,0" />
-            <ComboBox Name="ConfigSelector" Width="150" VerticalAlignment="Center" 
-                      HorizontalAlignment="Right" />
-        </StackPanel>
-    </Grid>
-</Border>
+                    <TextBlock Text="Configs:" VerticalAlignment="Center" FontSize="16"
+                        Foreground="White"
+                        Margin="0,0,5,0" />
+                    <ComboBox Name="ConfigSelector" Width="150" VerticalAlignment="Center"
+                        HorizontalAlignment="Right" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!-- Main Content -->
-        <Grid Name="GridRows" Margin="0,75,0,0">
+        <Grid Name="GridRows" Margin="0,80,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Name="VariableGridRow" Height="Auto" />   <!-- VariablesExpander row -->
                 <RowDefinition Name="LogGridRow" Height="*" />           <!-- LogsExpander row (remaining
@@ -115,18 +101,17 @@
             </Grid.RowDefinitions>
 
             <!-- Variables Expander -->
-            <Expander Name="VariablesExpander" HorizontalAlignment="Stretch" Header="Variables"
-                VerticalAlignment="Stretch" Margin="5" FontFamily="Arial" FontSize="18"
-                IsExpanded="True" Background="LightGray" Grid.Row="0">
+            <Expander Name="VariablesExpander" Header="Variables"
+                IsExpanded="True"  Grid.Row="0">
                 <DataGrid Name="Variables" IsReadOnly="False" FontSize="12"
                     AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="VariableName" Binding="{Binding VariableName}"
-                            Width="220" FontFamily="Verdana" FontSize="12" />
+                            Width="220" />
                         <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="350"
-                            FontFamily="Verdana" FontSize="12" />
+                        />
                         <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="200"
-                            FontFamily="Verdana" FontSize="12" />
+                        />
                     </DataGrid.Columns>
                     <DataGrid.ContextMenu>
                         <ContextMenu>
@@ -139,26 +124,25 @@
             </Expander>
 
             <!-- Logs Expander -->
-            <Expander Name="LogsExpander" Header="Logs" Margin="5" FontFamily="Arial" FontSize="18"
-                IsExpanded="True" Background="LightGray" Grid.Row="1">
+            <Expander Name="LogsExpander" Header="Logs" IsExpanded="True"
+                Grid.Row="1">
                 <DataGrid Name="Logs" GridLinesVisibility="none" IsReadOnly="True"
-                    SelectionMode="Single" FontSize="12" AutoGenerateColumns="False">
+                    SelectionMode="Single" AutoGenerateColumns="False">
 
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="300"
-                            FontFamily="Verdana" FontSize="12" />
+                        <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="300" />
                         <DataGridTextColumn Header="DateTime" Binding="{Binding Datetime}"
-                            Width="200" FontFamily="Verdana" FontSize="12" />
+                            Width="200" />
                         <DataGridTextColumn Header="severity" Binding="{Binding severity}"
-                            Width="100" FontFamily="Verdana" FontSize="12" />
+                            Width="100" />
                         <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="100"
-                            FontFamily="Verdana" FontSize="12" />
+                        />
                         <DataGridTextColumn Header="Component" Binding="{Binding Component}"
-                            Width="100" FontFamily="Verdana" FontSize="12" />
+                            Width="100" />
                         <DataGridTextColumn Header="Details" Binding="{Binding details}" Width="200"
-                            FontFamily="Verdana" FontSize="12" />
+                        />
                         <DataGridTextColumn Header="Thread" Binding="{Binding thread}" Width="50"
-                            FontFamily="Verdana" FontSize="12" />
+                        />
                     </DataGrid.Columns>
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
@@ -183,9 +167,8 @@
                 Grid.Row="2" />
 
             <!-- Template Expander -->
-            <Expander Name="TemplateExpander" Header="Template" Margin="5" IsExpanded="false"
-                FontFamily="Arial" FontSize="18" Visibility="Hidden" Background="LightGray">
-                <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Extended" FontSize="12"
+            <Expander Name="TemplateExpander" Header="Template" Margin="5" IsExpanded="false" Visibility="Hidden" >
+                <DataGrid Name="Template" IsReadOnly="True" SelectionMode="Extended" 
                     AutoGenerateColumns="false">
                     <DataGrid.ContextMenu>
                         <ContextMenu>
